@@ -3,8 +3,9 @@ function RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename);
 % RD = roms_createRunDef(shortname, dirname);
 % RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename);
 %
-% makes a structure containing the run shortname, dirname, and seriesDefs
-% for the _his and _dia files (if any _his or _dia files were found)
+% makes a structure containing the run shortname, dirname, seriesDefs
+% for the _his and _dia files (if any _his or _dia files were found),
+% and model grid
 %
 % neil banas feb 2009
 
