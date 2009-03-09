@@ -19,8 +19,7 @@ function [data,varargout] = roms_extractFromFile(filename, varname, theType, var
 if ~exist(filename)
 	error([filename ' not found.']);
 end
-info = nc_info(filename);
-if ~strmatch(varname, {info.Dataset.Name})
+if ~nc_isvar(filename,varname)
 	error(['variable ''' varname ''' not found in ' filename '.']);
 end
 
@@ -31,12 +30,42 @@ if strcmp(theType,'full') & nargout==1
 	return;
 end
 
+% get variable size
+sz = nc_varsize(filename, varname);
+ndims = length(sz);
+
+
+% 3D variables -------------------------------
+
+% if the extraction type is 'full' or 'surface' and the variable is
+% size [1 J I], matching the rho grid...
+if ndims==3 & sz(1)==1 & (strcmp(theType,'full') | strcmp(theType,'surface'))
+	J = sz(2);
+	I = sz(3);
+	G = roms_loadGrid(filename);
+	if I ~= G.I & J ~= G.J
+		error([varname ' is size [' num2str(sz) '] and this isn''t a rho-grid surface field.']);
+	end
+	xm = G.lon;
+	ym = G.lat;
+	zm = squeeze(nc_varget(filename,'zeta'));
+	data = squeeze(nc_varget(filename,varname));
+	data(G.mask==0) = nan;
+	switch nargout
+		case 2, varargout = {squeeze(zm)};
+		case 3, varargout = {squeeze(zm), squeeze(ym)};
+		case 4, varargout = {squeeze(zm), squeeze(ym), squeeze(xm)};
+	end
+	return
+end
+
+
+% 4D variables --------------------------------
+
 % from here on, we assume a 4D variable of size [1 K J I], where [K J I]
 % match the rho, u, v, or w grids
 
 % check variable size
-sz = nc_varsize(filename, varname);
-ndims = length(sz);
 if ndims ~= 4
 	error([varname ' is size [' num2str(sz) '] and this the wrong number of dimensions.']);
 elseif sz(1) ~= 1

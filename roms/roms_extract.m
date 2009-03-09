@@ -29,6 +29,7 @@ function [data,varargout] = roms_extract(varargin);
 %
 % neil banas feb 2009
 
+varargout = {};
 if ischar(varargin{1})
 	[data,varargout] = roms_extractFromFilename(varargin{:});
 elseif isstruct(varargin{1})

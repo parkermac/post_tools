@@ -29,24 +29,30 @@ end
 
 if length(t) > 1 % if t is a vector, recurse over each time in the vector
 
+	outputsInitialized = false;
 	for n = 1:length(t)
 		% extract one time slice
-		[data1,zm1,ym1,xm1] = roms_extract(series, varname, t(n), theType, varargin);
-		if n==1 % intialize output variables
-			data = repmat(nan,[length(t) size(data1)]);
-			tm = data;
-			zm = data;
-			ym = data;
-			xm = data;
+		disp(['    ' num2str(n) ' / ' num2str(length(t))]);
+		[data1,zm1,ym1,xm1] = roms_extractFromSeries(series, varname, t(n), theType, varargin{:});
+		if ~isempty(data1) 
+			if ~outputsInitialized
+				outputsInitialized = true;
+				data = repmat(nan,[length(t) size(data1)]);
+				tm = data;
+				zm = data;
+				ym = data;
+				xm = data;
+				L = length(data1(:));
+			end
+			% place the time slice in the output variables
+			data(n,:) = reshape(data1, [1 L]);
+			tm(n,:) = repmat(t(n), [1 L]);
+			zm(n,:) = reshape(zm1, [1 L]);
+			ym(n,:) = reshape(ym1, [1 L]);
+			xm(n,:) = reshape(xm1, [1 L]);
 		end
-		% place the time slice in the output variables
-		data(n,:) = data1;
-		tm(n,:) = repmat(t(n),[1 size(data1)]);
-		zm(n,:) = zm1;
-		ym(n,:) = ym1;
-		xm(n,:) = xm1;
 	end
-	
+
 	switch nargout
 		case 2, varargout = {tm};
 		case 3, varargout = {tm,zm};
@@ -58,24 +64,31 @@ else % t is scalar
 
 	% file numbers bracketing t
 	n = interp1(series.nctime, series.ncn, t);
-	n0 = floor(n);
-	file0 = roms_filename([series.dirname series.basename],n0);
-	n1 = ceil(n);
-	file1 = roms_filename([series.dirname series.basename],n1);
-	
-	% make sure the variable exists
-	info = nc_info(file0);
-	if ~strmatch(varname, {info.Dataset.Name})
-		error(['variable ''' varname ''' not found in ' file0 '.']);
-	end
-	
-	% do the extraction
-	[data,zm,ym,xm] = roms_extractFromFile(file0, varname, varargin);
-	if n0 ~= n1 % interpolate between frames if necessary
-		[data1,zm1,ym1,xm1] = roms_extractFromFile(file1, varname, varargin);
-		fr = (n-n0)/(n1-n0);
-		data = data + (data1-data).*fr;
-		zm = zm + (zm1-zm).*fr;
+	if isnan(n)
+		warning(['can''t find file numbers to go with ' datestr(t)]);
+		data = [];
+		zm = [];
+		ym = [];
+		xm = [];
+	else		
+		n0 = max(floor(n),series.ncn(1));
+		file0 = roms_filename([series.dirname series.basename],n0);
+		n1 = min(ceil(n),series.ncn(end));
+		file1 = roms_filename([series.dirname series.basename],n1);
+		
+		% make sure the variable exists
+		if ~nc_isvar(file0,varname)
+			error(['variable ''' varname ''' not found in ' file0 '.']);
+		end
+		
+		% do the extraction
+		[data,zm,ym,xm] = roms_extractFromFile(file0, varname, theType, varargin{:});
+		if n0 ~= n1 % interpolate between frames if necessary
+			[data1,zm1,ym1,xm1] = roms_extractFromFile(file1, varname, theType, varargin{:});
+			fr = (n-n0)/(n1-n0);
+			data = data + (data1-data).*fr;
+			zm = zm + (zm1-zm).*fr;
+		end
 	end
 	
 	switch nargout
