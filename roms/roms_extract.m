@@ -1,37 +1,36 @@
-function [data,varargout] = roms_extract(varargin);
+function [data,coords] = roms_extract(varargin);
 
-% [data,zm,ym,xm] = roms_extract(series, varname, t, 'full');
+% [data,coords] = roms_extract(series, 3Dvarname, t, 'full');
+%                                                 ..., 'point', y, x);
+%           ... = roms_extract(series, 4Dvarname, t, 'full');
 %                                               ..., 'surface');
 %                                               ..., 'zslice', z);
 %                                               ..., 'profile', y, x);
 %                                               ..., 'point', z, y, x);
 %
-% [data,tm,zm,ym,xm] = roms_extract(series, varname, tvector, ...
-%
-% [data,zm,ym,xm] = roms_extract(filename, varname, 'full');
-%                                              ..., 'surface');
-%                                              ..., 'zslice', z);
-%                                              ..., 'profile', y, x);
-%                                              ..., 'point', z, y, x);
+%              ... = roms_extract(filename, varname, ...
 %
 % general routine for extracting data from a ROMS netcdf file series or a
 % single file (e.g., ocean_his_*.nc) in data units.
 %
-% If a seriesDef _series_ is given (see roms_createSeriesDef.m), t can be
-% either a scalar or a vector. If a filename is given, t isn't given at all.
-% if the extraction type is 'full' and the coordinate variables zm,ym,xm aren't
-% requested, then the variable _varname_ can be anything. Otherwise, it's assumed
-% to be a 4D field of size [1 K J I], where K,J,I match the rho, u, v, or w grid.
+% assumes that the first dimension is ocean_time, and that there's only one save
+% per file, i.e.
+%     size [1 J I] for 3D variables, where (J,I) match the rho, u, or v grid
+%     size [1 K J I] for 4D variables, where K matches the rho or w grid, or K=1
 %
+% If a file series is specified (see roms_createSeriesDef.m), t can be
+% either a scalar or a vector. If a filename is given, t isn't given at all.
 % z, y, x can be scalars or vectors.
-% zm,ym,xm are plaid matrices the same size as _data_.
-
+%
+% coords is a structure containing plaid matrices the same size as data:
+%                  t scalar:       t vector:
+%     3D var:      ym,xm           tm,ym,xm
+%     4D var:      zm,ym,xm        tm,zm,ym,xm
 %
 % neil banas feb 2009
 
-varargout = {};
 if ischar(varargin{1})
-	[data,varargout] = roms_extractFromFilename(varargin{:});
+	[data,coords] = roms_extractFromFile(varargin{:});
 elseif isstruct(varargin{1})
-	[data,varargout] = roms_extractFromSeries(varargin{:});
+	[data,coords] = roms_extractFromSeries(varargin{:});
 end
