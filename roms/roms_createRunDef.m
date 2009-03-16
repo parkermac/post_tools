@@ -17,8 +17,20 @@ end
 RD.shortname = shortname;
 if dirname(end) ~= '/', dirname = [dirname '/']; end
 RD.dirname = dirname;
+
 his = roms_createSeriesDef(dirname, hisbasename);
-if ~isempty(his.ncn), RD.his = his; end
+if ~isempty(his.ncn)
+	RD.his = his;
+	RD.grid = roms_loadGrid(RD.his);
+end
+
 dia = roms_createSeriesDef(dirname, diabasename);
-if ~isempty(dia.ncn), RD.dia = dia; end
-RD.grid = roms_loadGrid(RD.his);
+if ~isempty(dia.ncn)
+	RD.dia = dia;
+	if length(dia.nctime) > 1
+		RD.dia.dt = RD.dia.nctime(2) - RD.dia.nctime(1); % time between saves: needed to convert the N_Flux_ terms into actual rates
+	end
+	if ~isfield(RD,'grid')  % if the grid wasn't loaded from the _his series
+		RD.grid = roms_loadGrid(RD.dia);
+	end
+end

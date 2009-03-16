@@ -2,6 +2,8 @@ function G = roms_loadGrid(A);
 
 % G = roms_loadGrid(filename);
 % G = roms_loadGrid(seriesDef);
+%
+% neil banas mar 2009
 
 if ischar(A)
 	fname = A;
@@ -26,5 +28,6 @@ G.maskv = nc_varget(fname,'mask_v');
 G.H = nc_varget(fname, 'h');
 G.H(G.mask==0) = nan;
 
-G.K = length(G.cs);
-[G.J, G.I] = size(G.lon);
+% K,J,I in Neil's jargon = N,L,M in ROMS jargon
+%G.K = length(G.cs);
+%[G.J, G.I] = size(G.lon);

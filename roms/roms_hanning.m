@@ -46,4 +46,4 @@ for i = 1:length(outputTimebase)
 	iAvg = iAvg+1;
 end
 
-Sout = roms_createSeriesDef(Sin.dirname, [Sin.basename suffix '_']);
+Sout = roms_createSeriesDef(Sin.dirname, [Sin.basename suffix '_']);	

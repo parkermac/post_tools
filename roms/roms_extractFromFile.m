@@ -111,7 +111,11 @@ else
 	else
 		error(['the 3rd & 4th dimensions of ' varname ' should be (eta_something, xi_something).']);
 	end
-	zeta2 = interp2(G.lon,G.lat,squeeze(nc_varget(filename,'zeta')),x2,y2);
+	try
+		zeta2 = interp2(G.lon,G.lat,squeeze(nc_varget(filename,'zeta')),x2,y2);
+	catch
+		zeta2 = zeros(size(x2)); % if zeta isn't in the file, use 0. Not a great solution.
+	end
 	H2 = interp2(G.lon,G.lat,G.H,x2,y2);
 	% make (cs) matching the variable in size in the z direction
 	if strcmp(dims{2},'s_rho')
@@ -149,13 +153,27 @@ else
 			xm = x2;
 			data(mask2==0) = nan;
 			
-		case {'zslice','zslices'} % ----- 4D, slice at one or more z values
+		case {'zslice','zslices','zSlice','zSlices'} % ----- 4D, slice at one or more z values (from MSL)
 			z = varargin{1};
 			zm = repmat(z(:),[1 J I]);
 			ym = repmat(reshape(y2,[1 J I]),[length(z(:)) 1 1]);
 			xm = repmat(reshape(x2,[1 J I]),[length(z(:)) 1 1]);
 			zetam = repmat(reshape(zeta2,[1 J I]),[length(z(:)) 1 1]);
 			Hm = repmat(reshape(H2,[1 J I]),[length(z(:)) 1 1]);
+			csm = (zm - zetam) ./ (zetam + Hm);
+			bad = isnan(csm) | csm > 0 | csm < -1;
+			csm(isnan(csm)) = 0;
+			data3 = squeeze(nc_varget(filename,varname));
+			data = interpn(cs3,y3,x3,data3,csm,ym,xm);
+			data(bad) = nan;
+			
+		case {'depthslice','depthslices','depthSlice','depthSlices'} % ----- 4D, slice at one or more depth values (from surface)
+			depth = varargin{1};
+			zetam = repmat(reshape(zeta2,[1 J I]),[length(depth(:)) 1 1]);
+			zm = repmat(depth(:),[1 J I]) + zetam;
+			ym = repmat(reshape(y2,[1 J I]),[length(depth(:)) 1 1]);
+			xm = repmat(reshape(x2,[1 J I]),[length(depth(:)) 1 1]);
+			Hm = repmat(reshape(H2,[1 J I]),[length(depth(:)) 1 1]);
 			csm = (zm - zetam) ./ (zetam + Hm);
 			bad = isnan(csm) | csm > 0 | csm < -1;
 			csm(isnan(csm)) = 0;

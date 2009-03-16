@@ -5,6 +5,7 @@ function [data,coords] = roms_extract(varargin);
 %           ... = roms_extract(series, 4Dvarname, t, 'full');
 %                                               ..., 'surface');
 %                                               ..., 'zslice', z);
+%												..., 'depthslice', depth);
 %                                               ..., 'profile', y, x);
 %                                               ..., 'point', z, y, x);
 %
@@ -21,6 +22,8 @@ function [data,coords] = roms_extract(varargin);
 % If a file series is specified (see roms_createSeriesDef.m), t can be
 % either a scalar or a vector. If a filename is given, t isn't given at all.
 % z, y, x can be scalars or vectors.
+%
+% zslice = from MSL; depthslice = below surface.
 %
 % coords is a structure containing plaid matrices the same size as data:
 %                  t scalar:       t vector:
