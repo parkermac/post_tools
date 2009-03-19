@@ -1,11 +1,14 @@
 function [data,coords] = roms_extract(varargin);
 
 % [data,coords] = roms_extract(series, 3Dvarname, t, 'full');
-%                                                 ..., 'point', y, x);
+%                                               ..., 'point', y, x);
+%
 %           ... = roms_extract(series, 4Dvarname, t, 'full');
 %                                               ..., 'surface');
 %                                               ..., 'zslice', z);
 %												..., 'depthslice', depth);
+%                                               ..., 'depthaverage', [mindepth maxdepth]);
+%                                               ..., 'depthintegral', [mindepth maxdepth]);
 %                                               ..., 'profile', y, x);
 %                                               ..., 'point', z, y, x);
 %
@@ -23,14 +26,17 @@ function [data,coords] = roms_extract(varargin);
 % either a scalar or a vector. If a filename is given, t isn't given at all.
 % z, y, x can be scalars or vectors.
 %
-% zslice = from MSL; depthslice = below surface.
+% zslice = measured from MSL; depthslice,average,integral = measured from surface.
 %
 % coords is a structure containing plaid matrices the same size as data:
 %                  t scalar:       t vector:
 %     3D var:      ym,xm           tm,ym,xm
-%     4D var:      zm,ym,xm        tm,zm,ym,xm
+%     4D var:      zm*,ym,xm       tm,zm,ym,xm
 %
-% neil banas feb 2009
+%                  *not for depthaverage,
+%				   depthintegral
+%
+% neil banas mar 2009
 
 if ischar(varargin{1})
 	[data,coords] = roms_extractFromFile(varargin{:});

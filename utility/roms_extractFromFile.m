@@ -6,6 +6,9 @@ function [data,coords] = roms_extractFromFile(filename, varname, theType, vararg
 %     roms_extractFromFile(filename, 4Dvarname, 'full');
 %                                          ..., 'surface');
 %                                          ..., 'zslice', z);
+%                                          ..., 'depthslice', depth);
+%                                          ..., 'depthaverage', [mindepth maxdepth]);
+%                                          ..., 'depthintegral', [mindepth maxdepth]);
 %                                          ..., 'profile', y, x);
 %                                          ..., 'point', z, y, x);
 %
@@ -13,7 +16,7 @@ function [data,coords] = roms_extractFromFile(filename, varname, theType, vararg
 % (e.g., ocean_his_*.nc) in data units. There should be no reason for the
 % user to call this directly: use roms_extract.m.
 %
-% neil banas feb 2009
+% neil banas mar 2009
 
 
 % make sure the file and the variable both exist
@@ -61,6 +64,8 @@ if ndims==3
 		error(['the 2nd & 3rd dimensions of ' varname ' should be (eta_something, xi_something).']);
 	end
 	
+	xm = [];
+	ym = [];
 	% do the extraction ----------------------------------
 	switch theType
 		case {'full','surface'} % ----- 3D, full
@@ -85,8 +90,8 @@ if ndims==3
 	
 	% clean up outputs -----------------------------------
 	data = squeeze(data);
-	coords.ym = squeeze(ym);
-	coords.xm = squeeze(xm);
+	if ~isempty(ym), coords.ym = squeeze(ym); end
+	if ~isempty(xm), coords.xm = squeeze(xm); end
 
 else
 	% 4D variables --------------------------------------------------------------------------------
@@ -137,6 +142,9 @@ else
 	z3 = zeta3 + cs3.*(zeta3+H3);
 	% below, we'll make zm,ym,xm,... to match the _extraction_ in size
 	
+	xm = [];
+	ym = [];
+	zm = [];
 	% do the extraction ----------------------------------
 	switch theType
 		case 'full' % ----- 4D, whole variable
@@ -170,7 +178,7 @@ else
 		case {'depthslice','depthslices','depthSlice','depthSlices'} % ----- 4D, slice at one or more depth values (from surface)
 			depth = varargin{1};
 			zetam = repmat(reshape(zeta2,[1 J I]),[length(depth(:)) 1 1]);
-			zm = repmat(depth(:),[1 J I]) + zetam;
+			zm = repmat(depth(:),[1 J I]) + zetam; % this is the only difference between depthslice and zslice
 			ym = repmat(reshape(y2,[1 J I]),[length(depth(:)) 1 1]);
 			xm = repmat(reshape(x2,[1 J I]),[length(depth(:)) 1 1]);
 			Hm = repmat(reshape(H2,[1 J I]),[length(depth(:)) 1 1]);
@@ -180,7 +188,19 @@ else
 			data3 = squeeze(nc_varget(filename,varname));
 			data = interpn(cs3,y3,x3,data3,csm,ym,xm);
 			data(bad) = nan;
+		
+		case {'depthaverage','depthAverage'} % ----- 4D, average over some depth range
+			ym = y2; % this can't be vectorized; output is always 2D
+			xm = x2;
+			data3 = squeeze(nc_varget(filename,varname));
+			[foo,data] = roms_depthIntegrate(data3, G.cs, G.csw, H2, zeta2, varargin{1});
 			
+		case {'depthintegral','depthIntegral'} % ----- 4D, integral over some depth range
+			ym = y2; % this can't be vectorized; output is always 2D
+			xm = x2;
+			data3 = squeeze(nc_varget(filename,varname));
+			[data,foo] = roms_depthIntegrate(data3, G.cs, G.csw, H2, zeta2, varargin{1});
+
 		case {'profile','profiles'} % ----- 3D, vertical profiles at one or more (y,x) pairs
 			y = varargin{1}(:);
 			x = varargin{2}(:);
@@ -224,8 +244,8 @@ else
 	
 	% clean up outputs ------------------------------------
 	data = squeeze(data);
-	coords.zm = squeeze(zm);
-	coords.ym = squeeze(ym);
-	coords.xm = squeeze(xm);
+	if ~isempty(zm), coords.zm = squeeze(zm); end
+	if ~isempty(ym), coords.ym = squeeze(ym); end
+	if ~isempty(xm), coords.xm = squeeze(xm); end
 	
 end

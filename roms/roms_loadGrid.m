@@ -25,8 +25,14 @@ G.csw = nc_varget(fname, 'Cs_w');
 G.mask = nc_varget(fname,'mask_rho');
 G.masku = nc_varget(fname,'mask_u');
 G.maskv = nc_varget(fname,'mask_v');
+
 G.H = nc_varget(fname, 'h');
+G.Hu = interp2(G.lon,G.lat,G.H,G.lonu,G.latu);
+G.Hv = interp2(G.lon,G.lat,G.H,G.lonv,G.latv);
 G.H(G.mask==0) = nan;
+G.Hu(G.masku==0) = nan;
+G.Hv(G.maskv==0) = nan;
+
 
 % K,J,I in Neil's jargon = N,L,M in ROMS jargon
 %G.K = length(G.cs);
