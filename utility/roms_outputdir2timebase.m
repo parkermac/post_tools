@@ -1,4 +1,4 @@
-function [nctime, ncn] = roms_outputdir2timebase(dirname,ncbasename);
+function [nctime, ncn] = roms_outputdir2timebase(dirname,ncbasename)
 
 % [nctime, ncn] = roms_outputdir2timebase(dirname,ncbasename);
 %

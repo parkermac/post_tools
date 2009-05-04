@@ -1,4 +1,4 @@
-function RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename);
+function RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename)
 
 % RD = roms_createRunDef(shortname, dirname);
 % RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename);

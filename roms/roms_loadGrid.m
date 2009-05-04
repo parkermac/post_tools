@@ -29,9 +29,9 @@ G.maskv = nc_varget(fname,'mask_v');
 G.H = nc_varget(fname, 'h');
 G.Hu = interp2(G.lon,G.lat,G.H,G.lonu,G.latu);
 G.Hv = interp2(G.lon,G.lat,G.H,G.lonv,G.latv);
-G.H(G.mask==0) = nan;
-G.Hu(G.masku==0) = nan;
-G.Hv(G.maskv==0) = nan;
+%G.H(G.mask==0) = nan; %change by DAS because getting NaN's in points that were too close to grid boundary
+%G.Hu(G.masku==0) = nan;
+%G.Hv(G.maskv==0) = nan;
 
 
 % K,J,I in Neil's jargon = N,L,M in ROMS jargon

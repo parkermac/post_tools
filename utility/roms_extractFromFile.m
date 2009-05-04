@@ -118,6 +118,7 @@ else
 	end
 	try
 		zeta2 = interp2(G.lon,G.lat,squeeze(nc_varget(filename,'zeta')),x2,y2);
+        zeta2(isnan(zeta2)) = 0; % set NaN's to 0
 	catch
 		zeta2 = zeros(size(x2)); % if zeta isn't in the file, use 0. Not a great solution.
 	end

@@ -3,7 +3,7 @@ function [data,coords] = roms_extract(varargin);
 % [data,coords] = roms_extract(series, 3Dvarname, t, 'full');
 %                                               ..., 'point', y, x);
 %
-%           ... = roms_extract(series, 4Dvarname, t, 'full');
+% [data,coords] = roms_extract(series, 4Dvarname, t, 'full');
 %                                               ..., 'surface');
 %                                               ..., 'zslice', z);
 %												..., 'depthslice', depth);

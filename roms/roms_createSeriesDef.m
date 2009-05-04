@@ -1,4 +1,4 @@
-function SD = roms_createSeriesDef(dirname, basename);
+function SD = roms_createSeriesDef(dirname, basename)
 
 % SD = roms_createSeriesDef(dirname, basename);
 %
