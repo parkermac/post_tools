@@ -61,7 +61,7 @@ if nargin > 2
              npos = length(varargin{2}); 
          elseif nvarargin == 1 & length(varargin{1}(1,:))==1; type = 2; %do depth only
          else type = 1; %do pos only
-             npos = length(varargin{1});
+             npos = length(varargin{1}(1,:));
         end  
        switch type
             case 1 %given position only
@@ -100,9 +100,9 @@ end %end nargin > 2
 % add info variables to list if not doing all
 do_castid = nc_isvar(filename,'castid');
 if ~do_all
-    varlist = ([varlist,{'latitude'},{'longitude'},{'pressure'}]); 
+    varlist = ([varlist;{'latitude'};{'longitude'};{'pressure'}]); 
     if(do_castid); %get cast id's if there, i.e. in ctd files only
-        varlist = ([varlist,{'castid'}]);
+        varlist = ([varlist;{'castid'}]);
     end
 end
 nv = length(varlist);
