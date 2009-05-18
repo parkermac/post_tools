@@ -36,8 +36,10 @@ end
     data.time = nc_varget(filename, 'time');
     data.latitude = nc_varget(filename, 'latitude');
     data.longitude = nc_varget(filename, 'longitude');
+    data.pressure = nc_varget(filename, 'pressure');
     [Mm,Nn]=size(data.latitude); %Nn is 1 if 1-D, >1 if 2-D, etc. 
     data.time = repmat(data.time,1,Nn); 
+    if(Nn>1);data.pressure = repmat(data.pressure(:)',Mm,1); end
     good = 1:Mm; % set this in case no timerange or lat/lon's given
     
 % now truncate according to time and/or distance
@@ -76,14 +78,13 @@ if nargin > 2
             case 2 %this means depth given only
                 do_depth = 1;
                 tdepth = varargin{1};
-                pp = nc_varget(filename,'pressure'); 
+                pp = data.pressure; 
                 dd = sw_dpth(pp,mean(data.latitude(:))); 
             case 3 %given position and depth
                 do_depth = 1;
                 tdepth = varargin{1};
-                pp = nc_varget(filename,'pressure'); 
+                pp = data.pressure; 
                 dd = sw_dpth(pp,mean(data.latitude(:)));
-                if(length(dd)~=Mm*Nn); dd=repmat(dd',Mm,1);end
                 poly = varargin{2};
                 if npos == 2 %if 2 then a polygon is given
                   inpoly = inpolygon(data.longitude(:), data.latitude(:), poly(:,2), poly(:,1));
@@ -100,9 +101,9 @@ end %end nargin > 2
 % add info variables to list if not doing all
 do_castid = nc_isvar(filename,'castid');
 if ~do_all
-    varlist = ([varlist;{'latitude'};{'longitude'};{'pressure'}]); 
+    varlist = ([varlist(:);{'latitude'};{'longitude'};{'pressure'}]); 
     if(do_castid); %get cast id's if there, i.e. in ctd files only
-        varlist = ([varlist;{'castid'}]);
+        varlist = ([varlist(:);{'castid'}]);
     end
 end
 nv = length(varlist);
@@ -116,6 +117,9 @@ for j = 1:nv
     % now put each variable into data structure, all for now, then truncate later
     disp(['    extracting ' varname ' from ' filename])
     datavec = nc_varget(filename, varname);
+    if(strcmp(varname,'pressure')); %if variable is pressure, use from before
+        datavec = data.pressure;
+    end
     %%% interpolate to depth
     if(do_depth)
       data_int = []; tint = [];

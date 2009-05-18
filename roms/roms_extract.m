@@ -1,4 +1,4 @@
-function [data,coords] = roms_extract(varargin);
+function [data,coords] = roms_extract(varargin)
 
 % [data,coords] = roms_extract(series, 3Dvarname, t, 'full');
 %                                               ..., 'point', y, x);
