@@ -52,7 +52,7 @@ if nargin > 2
         good = find(intime == 1);
         if(isempty(good)); error(['NO Data in this file for time range given!']); end
     else  
-        intime = ones(data.time(:));
+        intime = ones(size(data.time(:)));
         good = (1:(Mm*Nn))'; %otherwise, get all timesteps
     end
     

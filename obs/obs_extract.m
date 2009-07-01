@@ -1,10 +1,10 @@
 function data = obs_extract(files, vars, timeRange, varargin)
 %------------------------------------------------------------
-% data = obs_extract(filename, vars);
-%                              ..., timeRange);
+% data = obs_extract(filename, vars, timeRange);
 %                                         ..., LatLonVector);
 %                                         ..., z, LatLonVector);
 % data = obs_extract(directory, ...
+% data = obs_extract(cell array of files and directories, ...
 %
 % looks inside a netcdf file for one or more observational variables and
 % returns them in a structure _data_, along with coordinate variables.
@@ -31,23 +31,50 @@ function data = obs_extract(files, vars, timeRange, varargin)
 % but still plaid.)
 %
 % written by D. Sutherland and N. Banas, UW, Spring 2009
+%
+%
+% rewritten by NSB, jun 09, to accept a cell array of names as input; this
+% this makes obs_extractDir.m unnecessary. Now recurses over subdirectories too.
 %------------------------------------------------------------
 
-%check to see if file or directory of files exist
-type = exist(files, 'file');
-if type == 7 %then a directory exists
-    if files(end) ~= '/', files = [files '/']; end %make sure there's a backslash at end
-        filelist = dir([files, '*.nc']); %pick out netcdf files in that directory
-elseif type == 2 %then files is just one file
-        filelist = files;
+verbose = 1;
+data = [];
+
+% input = cell array of files and directories
+if iscell(files)
+	for i=1:length(files(:))
+		data2 = obs_extract(files{i}, vars, timeRange, varargin{:});
+		data = catstruct(data,data2);
+	end
 else
-    error(['Cannot find the file(s): ' files ' as requested']);
+	type = exist(files, 'file');	
+	if type == 7 % input = directory
+		if files(end) ~= '/', files = [files '/']; end %make sure there's a backslash at end
+		if verbose, disp(['obs_extract: looking inside ' files]); end
+		filelist = dir(files);
+		for i=1:length(filelist)
+			rec = filelist(i);
+			if rec.isdir
+				if rec.name(1) ~= '.'
+					% directory within the directory
+					data2 = obs_extract(rec.name, vars, timeRange, varargin{:});
+					data = catstruct(data,data2);
+				end
+			elseif length(rec.name)>3 & strcmp(rec.name(end-2:end),'.nc')
+				% .nc file within the directory
+				fullname = [files rec.name];
+				if verbose, disp(['obs_extract: reading from ' fullname]); end
+				data2 = obs_extractFile(fullname, vars, timeRange, varargin{:});
+				data = catstruct(data,data2);
+			end
+		end
+	elseif type == 2 % input = file
+		if length(files)>3 & strcmp(files(end-2:end),'.nc')
+			if verbose, disp(['obs_extract: reading from ' files]); end
+			data = obs_extractFile(files, vars, timeRange, varargin{:});
+		end
+	else
+		error(['Cannot find the file(s): ' files ' as requested']);
+	end
 end
 
-%do data extraction from other mfiles...
-switch type 
-    case 7
-        data = obs_extractDir(filelist, vars, timeRange, varargin{:});
-    case 2
-        data = obs_extractFile(filelist, vars, timeRange, varargin{:});
-end
