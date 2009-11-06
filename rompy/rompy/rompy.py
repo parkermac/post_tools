@@ -14,7 +14,7 @@ def extract(files,**kwargs):
 def test():
 	print('rompy.test() works')
 	extract('a.nc')
-	extract(['a.nc','b.nc'])
+	#extract(['a.nc','b.nc'])
 	try:
 		extract({'first':'a.nc'})
 	except TypeError, e:
