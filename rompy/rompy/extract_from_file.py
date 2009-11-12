@@ -85,7 +85,10 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 			y2 = y2[:]
 			mask2 = mask2[:]
 			data2 = np.ma.array(np.squeeze(ncvar[:]),mask=(mask2==0))
-			data = utils.interp_2d(lat=y2,lon=x2,data=data2,lati=ym,loni=xm)
+#			data = utils.interp_2d(lat=y2,lon=x2,data=data2,lati=ym,loni=xm)
+			mask = utils.interp_2d_xy(y=y2,x=x2,data=mask2,yi=ym,xi=xm)
+			data = utils.interp_2d_xy(y=y2,x=x2,data=data2,yi=ym,xi=xm)
+			data = np.ma.array(data,mask=(mask < 1))
 			coords['ym'] = ym
 			coords['xm'] = xm
 
