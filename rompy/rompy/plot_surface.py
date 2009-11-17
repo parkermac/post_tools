@@ -16,7 +16,6 @@ def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	ax.set_aspect('equal')
 	ax.grid()
 	FigureCanvas(fig).print_png(filename)
-	return True
 
 def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='i'):
 	fig = Figure(facecolor='white',figsize=(24.0,24.0))
@@ -58,4 +57,14 @@ def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution
 	m.pcolormesh(x,y,data)
 	m.drawcoastlines(linewidth=0.5)
 
+	FigureCanvas(fig).print_png(filename)
+
+def plot_profile(data,depth,filename='/Users/lederer/tmp/rompy.profile.png'):
+	fig = Figure()
+	ax = fig.add_subplot(111)
+	
+	ax.plot(data,depth)
+	
+	ax.grid()
+	
 	FigureCanvas(fig).print_png(filename)

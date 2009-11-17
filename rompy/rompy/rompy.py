@@ -6,9 +6,9 @@ def extract(files,**kwargs):
 		if kwargs.has_key('x') and kwargs.has_key('y'):
 			(data, coords) = extract_from_file.extract_from_file(file=files, varname='zeta', extraction_type='points', **kwargs)
 		else:
-			(data, coords) = extract_from_file.extract_from_file(files)
+			(data, coords) = extract_from_file.extract_from_file(files, **kwargs)
 	elif files.__class__ == list:
-		(data, coords) = extract_from_series.extract_from_series(files)
+		(data, coords) = extract_from_series.extract_from_series(files, **kwargs)
 	else:
 		raise TypeError('wrong type sent to the extractor')
 		return False
