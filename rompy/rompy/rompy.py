@@ -4,7 +4,7 @@ import extract_from_series
 def extract(files,**kwargs):
 	if files.__class__ == str:
 		if kwargs.has_key('x') and kwargs.has_key('y'):
-			(data, coords) = extract_from_file.extract_from_file(file=files, varname='zeta', extraction_type='points', **kwargs)
+			(data, coords) = extract_from_file.extract_from_file(file=files, **kwargs)
 		else:
 			(data, coords) = extract_from_file.extract_from_file(files, **kwargs)
 	elif files.__class__ == list:

@@ -5,7 +5,38 @@ def interp_2d(lat,lon,data,lati,loni):
 	return griddata(lat.reshape(lat.size),lon.reshape(lon.size),data.reshape(data.size),lati,loni)
 	
 def interp_2d_xy(x,y,data,xi,yi):
-	return griddata(x.reshape(x.size),y.reshape(y.size),data.reshape(data.size),xi,yi)
+	try:
+		di = griddata(x.reshape(x.size),y.reshape(y.size),data.reshape(data.size),xi,yi)
+	except TypeError:
+		di = np.zeros(xi.size)
+		if x.ndim ==2 and y.ndim ==2:
+			x_vec = x[0,:]
+			y_vec = y[:,0]
+		elif x.ndim == 3 and y.ndim == 3:
+			x_vec = x[0,0,:]
+			y_vec = y[0,:,0]
+		else:
+			x_vec = x
+			y_vec = y
+		xl = np.nonzero(x_vec <= xi)[0][-1]
+		xh = np.nonzero(xi <= x_vec)[0][0]
+		yl = np.nonzero(y_vec <= yi)[0][-1]
+		yh = np.nonzero(yi <= y_vec)[0][0]
+				
+		if not x_vec[xl] == x_vec[xh]:
+			xd = (xi-x_vec[xh])/(x_vec[xl]-x_vec[xh])
+		else:
+			xd = 1.
+		if not y_vec[yl] == y_vec[yh]:
+			yd = (yi-y_vec[yh])/(y_vec[yl]-y_vec[yh])
+		else:
+			yd = 1.
+
+		w0 = data[yl,xl]*(1-yd) + data[yh,xl]*yd
+		w1 = data[yl,xh]*(1-yd) + data[yh,xh]*yd
+	
+		di = w0*(1-xd) + w1*xd
+	return di
 
 def interp_3d_point(x,y,z,d,xi,yi,zi):
 	if not x.ndim == 1 or not y.ndim == 1 or not z.ndim == 1:
@@ -13,17 +44,34 @@ def interp_3d_point(x,y,z,d,xi,yi,zi):
 	if not xi.size == 1 or not yi.size == 1 or not zi.size ==1:
 		print(xi,yi,zi)
 		raise(TypeError, 'interp_3d_from_point needs xi, yi, and zi to be a single value')
-	xl = np.nonzero(x < xi)[0][-1]
-	xh = np.nonzero(xi <= x)[0][0]
-	yl = np.nonzero(y < yi)[0][-1]
-	yh = np.nonzero(yi <= y)[0][0]
-	zl = np.nonzero(z < zi)[0][-1]
-	zh = np.nonzero(zi <= z)[0][0]
+	try:
+		xl = np.nonzero(x <= xi)[0][-1]
+		xh = np.nonzero(xi <= x)[0][0]
+		yl = np.nonzero(y <= yi)[0][-1]
+		yh = np.nonzero(yi <= y)[0][0]
+		zl = np.nonzero(z <= zi)[0][-1]
+		zh = np.nonzero(zi <= z)[0][0]
+	except IndexError, e:
+		print('x, xi')
+		print(x,xi)
+		print('y, yi')
+		print(y,yi)
+		print('z, zi')
+		print(z,zi)
 #	print((xl,xi, xh),(yl, yi, yh),( zl, zi, zh))
 	
-	xd = (xi-x[xh])/(x[xl]-x[xh])
-	yd = (yi-y[yh])/(y[yl]-y[yh])
-	zd = (zi-z[zh])/(z[zl]-z[zh])
+	if not x[xl] == x[xh]:
+		xd = (xi-x[xh])/(x[xl]-x[xh])
+	else:
+		xd = 1.
+	if not y[yl] == y[yh]:
+		yd = (yi-y[yh])/(y[yl]-y[yh])
+	else:
+		yd = 1.
+	if not z[zl] == z[zh]:
+		zd = (zi-z[zh])/(z[zl]-z[zh])
+	else:
+		zd = 1.
 	
 	i0 = d[zl,yl,xl]*(1-zd) + d[zh,yl,xl]*zd
 	i1 = d[zl,yh,xl]*(1-zd) + d[zh,yh,xl]*zd
@@ -68,7 +116,10 @@ def interp_3d(x,y,z,data,xi,yi,zi):
 				for j in range(len(yi)):
 					for k in range(len(zi)):
 						di[k,j,i] = interp_3d_point(x_vec,y_vec,z_vec,data,xi[i],yi[j],zi[k])
+
+		# if xi, yi, and zi are not vectors, then lets just do everything on a point by point basis.
 		elif xi.shape == yi.shape and xi.shape == zi.shape:
+			print("I'm in the right place")
 			di = np.zeros(xi.shape)
 			for i in range(xi.size):
 				di.flat[i] = interp_3d_point(x_vec,y_vec,z_vec,data,xi.flat[i],yi.flat[i],zi.flat[i])
@@ -205,3 +256,108 @@ def ndgrid(*args,**kwargs):
     """
     kwargs['indexing'] = 'ij'
     return meshgrid(*args,**kwargs)
+
+def station_to_lat_lon(station_list):
+	lat_dict = {}
+	lon_dict = {}
+	
+	lat_dict[6] = 47.925
+	lon_dict[6] = -122.4685
+	
+	lat_dict[7] = 47.9835
+	lon_dict[7] = -122.6201
+	
+	lat_dict[8] = 47.8967
+	lon_dict[8] = -122.6053
+	
+	lat_dict[9] = 47.8333
+	lon_dict[9] = -122.6673
+	
+	lat_dict[10] = 47.8001
+	lon_dict[10] = -122.7198
+
+	lat_dict[11] = 47.3712
+	lon_dict[11] = -123.1329
+
+	lat_dict[12] = 47.4253
+	lon_dict[12] = -123.1083
+
+	lat_dict[13] = 47.5471
+	lon_dict[13] = -123.008
+
+	lat_dict[14] = 47.6068
+	lon_dict[14] = -122.9399
+
+	lat_dict[15] = 47.6616
+	lon_dict[15] = -122.8601
+
+	lat_dict[17] = 47.7356
+	lon_dict[17] = -122.7614
+
+	lat_dict[18] = 48.0303
+	lon_dict[18] = -122.6169
+
+	lat_dict[19] = 48.0915
+	lon_dict[19] = -122.6318
+
+	lat_dict[20] = 48.142
+	lon_dict[20] = -122.6848
+
+	lat_dict[21] = 48.1883
+	lon_dict[21] = -122.8504
+
+	lat_dict[22] = 48.2717
+	lon_dict[22] = -123.0189
+
+	lat_dict[24] = 48.3416
+	lon_dict[24] = -123.1249
+
+	lat_dict[27] = 47.8133
+	lon_dict[27] = -122.455
+
+	lat_dict[28] = 47.7034
+	lon_dict[28] = -122.4544
+
+	lat_dict[29] = 47.5568
+	lon_dict[29] = -122.4433
+
+	lat_dict[30] = 47.4565
+	lon_dict[30] = -122.4084
+
+	lat_dict[31] = 47.3937
+	lon_dict[31] = -122.3601
+
+	lat_dict[32] = 47.3329
+	lon_dict[32] = -122.4427
+
+	lat_dict[33] = 47.3198
+	lon_dict[33] = -122.5008
+
+	lat_dict[401] = 47.49
+	lon_dict[401] = -123.0567
+
+	lat_dict[402] = 47.3567
+	lon_dict[402] = -123.0233
+
+	lat_dict[403] = 47.3983
+	lon_dict[403] = -122.9283
+
+
+	lat = []
+	lon = []
+	for s in station_list:
+		lat.append(lat_dict[s])
+		lon.append(lon_dict[s])
+	return np.array(lon), np.array(lat)
+
+def hood_canal_station_list():
+	return [24,22,21,20,19,18,7,8,9,10,17,18,15,14,13,401,12,11,402,403]
+
+def main_basin_station_list():
+	return [24,22,21,20,19,18,7,6,27,28,29,30,31,32,33]
+	
+def hood_canal_xy():
+	return station_to_lat_lon(hood_canal_station_list())
+
+def main_basin_xy():
+	return station_to_lat_lon(main_basin_station_list())
