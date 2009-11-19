@@ -12,8 +12,10 @@ map1 = False
 map2 = False
 map3 = False
 map4 = False
-map5 = True
-map6 = True
+map5 = False
+map6 = False
+map7 = True
+map8 = True
 
 if map1:
 	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='zeta')
@@ -102,3 +104,15 @@ if map6:
 	ax.set_xlabel('station ID')
 	
 	FigureCanvas(fig).print_png('/Users/lederer/tmp/rompy.map6.png')
+
+if map7:
+	n = 4
+	x,y = utils.high_res_main_basin_xy(n=n)
+	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='salt',extraction_type='profile',x=x,y=y)
+	plot_utils.plot_mickett(coords=coords,data=data,varname='Salinity',region='Main Basin',filename='/Users/lederer/tmp/rompy.mickett_main.png',n=n)
+
+if map8:
+	n=3
+	x,y = utils.high_res_hood_canal_xy(n=n)
+	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='salt',extraction_type='profile',x=x,y=y)
+	plot_utils.plot_mickett(coords=coords,data=data,varname='Salinity',region='Hood Canal',filename='/Users/lederer/tmp/rompy.mickett_hood.png',n=n)

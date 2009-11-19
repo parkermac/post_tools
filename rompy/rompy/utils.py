@@ -267,8 +267,14 @@ def station_to_lat_lon(station_list):
 	lat_dict[7] = 47.9835
 	lon_dict[7] = -122.6201
 	
+	lat_dict[7.5] = 47.9269
+	lon_dict[7.5] = -122.6418
+	
 	lat_dict[8] = 47.8967
 	lon_dict[8] = -122.6053
+	
+	lat_dict[8.5] = 47.8708
+	lon_dict[8.5] = -122.5848
 	
 	lat_dict[9] = 47.8333
 	lon_dict[9] = -122.6673
@@ -290,7 +296,15 @@ def station_to_lat_lon(station_list):
 
 	lat_dict[15] = 47.6616
 	lon_dict[15] = -122.8601
+	
+# true station 16 lat lon
+#	lat_dict[16] = 47.6917
+#	lon_dict[16] = -122.6074
 
+# fake station 16 lat lon
+	lat_dict[16] = 47.6793
+	lon_dict[16] = -122.7578
+	
 	lat_dict[17] = 47.7356
 	lon_dict[17] = -122.7614
 
@@ -350,8 +364,23 @@ def station_to_lat_lon(station_list):
 		lon.append(lon_dict[s])
 	return np.array(lon), np.array(lat)
 
+def high_res_station_to_lat_lon(station_list,n=5):
+	lon, lat = station_to_lat_lon(station_list)
+	
+	hr_lat = []
+	hr_lon = []
+	
+	for i in range(len(lat)-1):
+		for j in range(n):
+			frac = float(j)/float(n)
+			hr_lat.append(lat[i]*(1-frac) + lat[i+1]*frac)
+			hr_lon.append(lon[i]*(1-frac) + lon[i+1]*frac)
+	hr_lat.append(lat[-1])
+	hr_lon.append(lon[-1])
+	return np.array(hr_lon), np.array(hr_lat)
+
 def hood_canal_station_list():
-	return [24,22,21,20,19,18,7,8,9,10,17,18,15,14,13,401,12,11,402,403]
+	return [24,22,21,20,19,18,7,7.5,8,8.5,9,10,17,16,15,14,13,401,12,11,402]
 
 def main_basin_station_list():
 	return [24,22,21,20,19,18,7,6,27,28,29,30,31,32,33]
@@ -361,3 +390,15 @@ def hood_canal_xy():
 
 def main_basin_xy():
 	return station_to_lat_lon(main_basin_station_list())
+
+def high_res_hood_canal_xy(n=1):
+	if n == 1:
+		return station_to_lat_lon(hood_canal_station_list())
+	else:
+		return high_res_station_to_lat_lon(hood_canal_station_list(),n)
+
+def high_res_main_basin_xy(n=1):
+	if n == 1:
+		return station_to_lat_lon(main_basin_station_list())
+	else:
+		return high_res_station_to_lat_lon(main_basin_station_list(),n)

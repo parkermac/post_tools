@@ -1,9 +1,12 @@
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 from mpl_toolkits.basemap import Basemap
 import numpy as np
 import matplotlib.pyplot as plt
+
+import utils
 
 def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	print('Making plot')
@@ -66,5 +69,45 @@ def plot_profile(data,depth,filename='/Users/lederer/tmp/rompy.profile.png'):
 	ax.plot(data,depth)
 	
 	ax.grid()
+	
+	FigureCanvas(fig).print_png(filename)
+
+def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1):
+	fig = Figure(facecolor='white')
+	
+	ax1 = fig.add_axes([0.1, 0.5, 0.75, 0.4])
+	ax2 = fig.add_axes([0.1, 0.1, 0.75, 0.4])
+	cax = fig.add_axes([0.9,0.1,0.02,0.8],frameon=False)
+	
+	my_plot11 = ax1.contourf(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100)
+	my_plot12 = ax1.contour(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None)
+	ax1.fill_between(np.arange(data.shape[1]),coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
+	ax1.set_ylim((-20,0))
+	ax1.set_xlim((0,data.shape[1]-1))
+	
+	my_plot21 = ax2.contourf(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100)
+	my_plot22 = ax2.contour(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None)
+	ax2.fill_between(np.arange(data.shape[1]),coords['zm'][0,:],ax2.get_ylim()[0],color='grey')
+	ax2.set_ylim(ax2.get_ylim()[0],-20)
+	ax2.set_xlim((0,data.shape[1]-1))
+	
+	fig.colorbar(my_plot11,cax=cax)
+	ax1.set_title('%s %s from a ROMS run' % (region,varname))
+	ax1.set_ylabel('depth in meters',position=(0.05,0))
+	ax1.set_xticks(np.arange(data.shape[1]))
+	ax1.set_xticklabels('')
+	
+	ax2.set_xticks(np.arange(data.shape[1]))
+	
+	print(ax2.get_xticks())
+	if region == 'Hood Canal':
+		ax2.set_xticks(n*np.arange(len(utils.hood_canal_station_list())))
+		ax2.set_xticklabels(utils.hood_canal_station_list())
+	elif region == 'Main Basin':
+		ax2.set_xticks(n*np.arange(len(utils.main_basin_station_list())))
+		ax2.set_xticklabels(utils.main_basin_station_list())
+	else:
+		ax2.set_xticklabels('')
+	ax2.set_xlabel('station ID')
 	
 	FigureCanvas(fig).print_png(filename)

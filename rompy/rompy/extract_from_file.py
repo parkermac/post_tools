@@ -205,8 +205,6 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 			if not x.shape == y.shape or not x.ndim == 1:
 				raise(TypeError,'In profiles x and y must be vectors that are the same length.')
 
-			print('cs')
-			print(cs)
 			if kwargs.has_key('cs'):
 				csi = kwargs['cs']
 				zi = np.tile(csi.reshape(csi.size,1),(1,x.size))
