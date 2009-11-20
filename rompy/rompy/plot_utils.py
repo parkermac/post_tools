@@ -1,6 +1,7 @@
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib.colors import Normalize
 
 from mpl_toolkits.basemap import Basemap
 import numpy as np
@@ -72,42 +73,60 @@ def plot_profile(data,depth,filename='/Users/lederer/tmp/rompy.profile.png'):
 	
 	FigureCanvas(fig).print_png(filename)
 
-def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1):
+def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers'):
 	fig = Figure(facecolor='white')
+	fontsize = 8
 	
 	ax1 = fig.add_axes([0.1, 0.5, 0.75, 0.4])
 	ax2 = fig.add_axes([0.1, 0.1, 0.75, 0.4])
-	cax = fig.add_axes([0.9,0.1,0.02,0.8],frameon=False)
+	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
 	
-	my_plot11 = ax1.contourf(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100)
-	my_plot12 = ax1.contour(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None)
-	ax1.fill_between(np.arange(data.shape[1]),coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
+#	clim = {'vmin':0,'vmax':35}
+	norm = Normalize(vmin=25,vmax=35,clip=False)
+	norm = None
+	
+	x_axis_as_km = utils.coords_to_km(coords)
+	
+	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm)
+	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm)
+	
+	ax1.fill_between(x_axis_as_km,coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
 	ax1.set_ylim((-20,0))
-	ax1.set_xlim((0,data.shape[1]-1))
+	ax1.set_xlim((0,x_axis_as_km[-1]))
 	
-	my_plot21 = ax2.contourf(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100)
-	my_plot22 = ax2.contour(np.tile(np.arange(data.shape[1]),(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None)
-	ax2.fill_between(np.arange(data.shape[1]),coords['zm'][0,:],ax2.get_ylim()[0],color='grey')
+	my_plot21 = ax2.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm)
+	my_plot22 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm)
+	ax2.fill_between(x_axis_as_km,coords['zm'][0,:],ax2.get_ylim()[0],color='grey')
 	ax2.set_ylim(ax2.get_ylim()[0],-20)
-	ax2.set_xlim((0,data.shape[1]-1))
+	ax2.set_xlim((0,x_axis_as_km[-1]))
 	
 	fig.colorbar(my_plot11,cax=cax)
 	ax1.set_title('%s %s from a ROMS run' % (region,varname))
 	ax1.set_ylabel('depth in meters',position=(0.05,0))
-	ax1.set_xticks(np.arange(data.shape[1]))
+	ax1.set_xticks(10*np.arange(x_axis_as_km[-1]/10))
 	ax1.set_xticklabels('')
 	
-	ax2.set_xticks(np.arange(data.shape[1]))
-	
-	print(ax2.get_xticks())
-	if region == 'Hood Canal':
-		ax2.set_xticks(n*np.arange(len(utils.hood_canal_station_list())))
-		ax2.set_xticklabels(utils.hood_canal_station_list())
-	elif region == 'Main Basin':
-		ax2.set_xticks(n*np.arange(len(utils.main_basin_station_list())))
-		ax2.set_xticklabels(utils.main_basin_station_list())
-	else:
-		ax2.set_xticklabels('')
-	ax2.set_xlabel('station ID')
+	if x_axis_style == 'kilometers' or x_axis_style == 'kilometer':
+			tick_list = x_axis_as_km[::n]
+			ax2.set_xticks(tick_list)
+			ax2.set_xticklabels([int(tick) for tick in tick_list],size=fontsize)
+			ax2.set_xlabel('Kilometers')
+
+	elif x_axis_style == 'stations' or x_axis_style == 'station':
+		if region == 'Hood Canal':
+			tick_list = x_axis_as_km[::n]
+			ax2.set_xticks(tick_list)
+			ax2.set_xticklabels(utils.hood_canal_station_list(),size=fontsize)
+			ax2.set_xlabel('Station ID')
+			
+		elif region == 'Main Basin':
+			tick_list = x_axis_as_km[::n]
+			ax2.set_xticks(tick_list)
+			ax2.set_xticklabels(utils.main_basin_station_list(),size=fontsize)
+	 		ax2.set_xlabel('Station ID') 			
+ 	else:
+ 		ax2.set_xticks(x_axis_as_km)
+ 		ax2.set_xticklabels('')
+		ax2.set_xlabel('Kilometers')
 	
 	FigureCanvas(fig).print_png(filename)

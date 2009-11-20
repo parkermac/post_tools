@@ -402,3 +402,31 @@ def high_res_main_basin_xy(n=1):
 		return station_to_lat_lon(main_basin_station_list())
 	else:
 		return high_res_station_to_lat_lon(main_basin_station_list(),n)
+		
+def latlon_to_km(lat1,lon1,lat2,lon2):
+	RADIUS = 6378.0
+#	d=2*asin(sqrt((sin((lat1-lat2)/2))^2 + cos(lat1)*cos(lat2)*(sin((lon1-lon2)/2))^2))
+	
+	lat1r = np.radians(lat1)
+	lon1r = np.radians(lon1)
+	lat2r = np.radians(lat2)
+	lon2r = np.radians(lon2)	
+	
+	rads=2*(np.arcsin(np.sqrt(np.power(np.sin((lat1r-lat2r)/2.0),2.0) + np.cos(lat1r)*np.cos(lat2r)*np.power(np.sin((lon1r-lon2r)/2.0),2.0))))
+	d = RADIUS*rads
+	return d
+
+def coords_to_km(coords):
+	lon_list = coords['xm']
+	lat_list = coords['ym']
+	
+	km_list = [0.0]
+	
+	for i in range(len(lon_list)-1):
+		km_list.append(latlon_to_km(lat_list[i+1],lon_list[i+1],lat_list[i],lon_list[i]) + km_list[i])
+	return km_list
+
+def station_list_to_km(sl):
+	lat,lon = station_to_lat_lon(sl)
+	
+	return coords_to_km({'xm':lon,'ym':lat})
