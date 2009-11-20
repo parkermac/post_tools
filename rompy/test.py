@@ -108,11 +108,17 @@ if map6:
 if map7:
 	n = 4
 	x,y = utils.high_res_main_basin_xy(n=n)
+	
 	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='salt',extraction_type='profile',x=x,y=y)
-	plot_utils.plot_mickett(coords=coords,data=data,varname='Salinity',region='Main Basin',filename='/Users/lederer/tmp/rompy.mickett_main.png',n=n)
+	plot_utils.plot_mickett(coords=coords,data=data,varname='Salinity',region='Main Basin',filename='/Users/lederer/tmp/rompy.mickett_main_salt.png',n=n,clim=[10,35])
+	
+	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='temp',extraction_type='profile',x=x,y=y)
+	plot_utils.plot_mickett(coords=coords,data=data,varname='Temperature',region='Main Basin',filename='/Users/lederer/tmp/rompy.mickett_main_temp.png',n=n,x_axis_style='station',clim=[0,20])
 
 if map8:
 	n=3
 	x,y = utils.high_res_hood_canal_xy(n=n)
 	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='salt',extraction_type='profile',x=x,y=y)
-	plot_utils.plot_mickett(coords=coords,data=data,varname='Salinity',region='Hood Canal',filename='/Users/lederer/tmp/rompy.mickett_hood.png',n=n,x_axis_style='station')
+	plot_utils.plot_mickett(coords=coords,data=data,varname='Salinity',region='Hood Canal',filename='/Users/lederer/tmp/rompy.mickett_hood_salt.png',n=n,clim=[10,35])
+	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='temp',extraction_type='profile',x=x,y=y)
+	plot_utils.plot_mickett(coords=coords,data=data,varname='Temperature',region='Hood Canal',filename='/Users/lederer/tmp/rompy.mickett_hood_temp.png',n=n,x_axis_style='station',clim=[0,20])

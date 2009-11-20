@@ -2,6 +2,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
 
 from mpl_toolkits.basemap import Basemap
 import numpy as np
@@ -73,7 +74,7 @@ def plot_profile(data,depth,filename='/Users/lederer/tmp/rompy.profile.png'):
 	
 	FigureCanvas(fig).print_png(filename)
 
-def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers'):
+def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',clim=None):
 	fig = Figure(facecolor='white')
 	fontsize = 8
 	
@@ -81,12 +82,16 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	ax2 = fig.add_axes([0.1, 0.1, 0.75, 0.4])
 	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
 	
-#	clim = {'vmin':0,'vmax':35}
-	norm = Normalize(vmin=25,vmax=35,clip=False)
-	norm = None
-	
 	x_axis_as_km = utils.coords_to_km(coords)
-	
+
+	if not clim == None:
+		norm = Normalize(vmin=clim[0],vmax=clim[1],clip=False)
+		sm = ScalarMappable(norm=norm)
+		sm.set_clim(vmin=clim[0],vmax=clim[1])
+		sm.set_array(np.array([0]))
+	else:
+		norm = None	
+
 	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm)
 	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm)
 	
@@ -100,7 +105,10 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	ax2.set_ylim(ax2.get_ylim()[0],-20)
 	ax2.set_xlim((0,x_axis_as_km[-1]))
 	
-	fig.colorbar(my_plot11,cax=cax)
+	if clim == None:
+		sm = my_plot11
+	
+	fig.colorbar(sm,cax=cax)
 	ax1.set_title('%s %s from a ROMS run' % (region,varname))
 	ax1.set_ylabel('depth in meters',position=(0.05,0))
 	ax1.set_xticks(10*np.arange(x_axis_as_km[-1]/10))
