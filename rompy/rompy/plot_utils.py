@@ -34,7 +34,7 @@ def banas_cm(a,b,c,d):
 		# add dark blue
 		cdict['red'].append((0., 0., 0.))
 		cdict['green'].append((0., 0., 0.))
-		cdict['blue'].append((0., 0., 0.125))
+		cdict['blue'].append((0., 0., 0.25))
 		
 		# add blue
 		cdict['red'].append((norm(b), 0., 0.))
@@ -62,7 +62,7 @@ def banas_cm(a,b,c,d):
 		cdict['blue'].append((norm(c), 0., 0.))
 		
 		# add dark red
-		cdict['red'].append((1.0, 0.125, 0.125))
+		cdict['red'].append((1.0, 0.25, 0.25))
 		cdict['green'].append((1.0, 0., 0.))
 		cdict['blue'].append((1.0, 0., 0.))
 	else:
@@ -70,7 +70,7 @@ def banas_cm(a,b,c,d):
 		cdict['green'].append((1.0, 0., 0.))
 		cdict['blue'].append((1.0, 0., 0.))
 	
-	return LinearSegmentedColormap('banas_cm',cdict,N=256)
+	return LinearSegmentedColormap('banas_cm',cdict,N=25)
 	
 		
 	
