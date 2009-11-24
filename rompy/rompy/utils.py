@@ -356,7 +356,9 @@ def station_to_lat_lon(station_list):
 	lat_dict[403] = 47.3983
 	lon_dict[403] = -122.9283
 
-
+	lat_dict['admiralty inlet'] = 48.1734
+	lon_dict['admiralty inlet'] = -122.7557
+	
 	lat = []
 	lon = []
 	for s in station_list:
@@ -421,7 +423,6 @@ def coords_to_km(coords):
 	lat_list = coords['ym']
 	
 	km_list = [0.0]
-	
 	for i in range(len(lon_list)-1):
 		km_list.append(latlon_to_km(lat_list[i+1],lon_list[i+1],lat_list[i],lon_list[i]) + km_list[i])
 	return km_list
@@ -430,3 +431,41 @@ def station_list_to_km(sl):
 	lat,lon = station_to_lat_lon(sl)
 	
 	return coords_to_km({'xm':lon,'ym':lat})
+	
+def offset_calc(x1,y1,x2,y2,x3,y3,x4,y4):
+	a = x2 - x1
+	b = x3 - x4
+	c = y2 - y1
+	d = y3 - y4
+	e = x3 - x1
+	f = y3 - y1
+	
+	t = (d*e - b*f)/(a*d - b*c)
+	
+	if t >= 0.0 and t < 1.0:
+		return t
+	else:
+		return None
+
+def offset_region(coords,region='Admiralty Inlet'):
+	if region == 'Admiralty Inlet':
+		lon3 = -122.7090
+		lat3 = 48.1931
+		lon4 = -122.7774
+		lat4 = 48.1267
+	
+	distances = coords_to_km(coords)
+	lat = coords['ym']
+	lon = coords['xm']
+	
+	rval = 0.0
+	for i in range(len(lat)-1):
+		lat1 = lat[i]
+		lat2 = lat[i+1]
+		lon1 = lon[i]
+		lon2 = lon[i+1]
+		t = offset_calc(lon1,lat1,lon2,lat2,lon3,lat3,lon4,lat4)
+		if t >= 0.0 and t < 1.0:
+			rval = distances[i] + t*(distances[i+1] - distances[i])
+	return rval
+			

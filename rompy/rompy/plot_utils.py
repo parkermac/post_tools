@@ -1,7 +1,7 @@
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, ListedColormap, LinearSegmentedColormap
 from matplotlib.cm import ScalarMappable
 
 from mpl_toolkits.basemap import Basemap
@@ -10,6 +10,71 @@ import matplotlib.pyplot as plt
 
 import utils
 
+def red_blue_cm():
+	cdict = {'red':		[(0.0, 0.0, 0.0),
+						(0.5,1.0,1.0),
+						(1.0, 1.0, 1.0)],
+			
+			'green':	[(0.0, 0.0, 0.0),
+						(0.5, 1.0, 1.0),
+						(1.0, 0.0, 0.0)],
+			
+			'blue':		[(0.0, 1.0, 1.0),
+						(0.5, 1.0, 1.0),
+						(1.0, 0.0, 0.0)]
+			}
+	return LinearSegmentedColormap('red_blue_cm',cdict,N=256)
+#	return ListedColormap(['b','w','r'],name='red_blue',N=None)
+
+def banas_cm(a,b,c,d):
+	norm = Normalize(vmin=a,vmax=d,clip=False)
+	cdict = {'red':[],'green':[],'blue':[]}
+	
+	if not a==b:
+		# add dark blue
+		cdict['red'].append((0., 0., 0.))
+		cdict['green'].append((0., 0., 0.))
+		cdict['blue'].append((0., 0., 0.125))
+		
+		# add blue
+		cdict['red'].append((norm(b), 0., 0.))
+		cdict['green'].append((norm(b), 0., 0.))
+		cdict['blue'].append((norm(b), 1.0, 1.0))
+	else:
+		cdict['red'].append((0., 0., 0.))
+		cdict['green'].append((0., 0., 0.))
+		cdict['blue'].append((0., 0., 1.0))
+
+	# add green between blue and yellow
+	cdict['red'].append((norm(b + (c-b)/4.0), 0., 0.))
+	cdict['green'].append((norm(b + (c-b)/4.0), 1.0, 1.0))
+	cdict['blue'].append((norm(b + (c-b)/4.0), 0., 0.))
+
+	# add yellow in the middle
+	cdict['red'].append((norm((b+c)/2.0), 1.0, 1.0))
+	cdict['green'].append((norm((b+c)/2.0), 1.0, 1.0))
+	cdict['blue'].append((norm((b+c)/2.0), 0., 0.))
+
+	if not c==d:
+		# add red
+		cdict['red'].append((norm(c), 1.0, 1.0))
+		cdict['green'].append((norm(c), 0., 0.))
+		cdict['blue'].append((norm(c), 0., 0.))
+		
+		# add dark red
+		cdict['red'].append((1.0, 0.125, 0.125))
+		cdict['green'].append((1.0, 0., 0.))
+		cdict['blue'].append((1.0, 0., 0.))
+	else:
+		cdict['red'].append((1.0, 1.0, 1.))
+		cdict['green'].append((1.0, 0., 0.))
+		cdict['blue'].append((1.0, 0., 0.))
+	
+	print(cdict)
+	return LinearSegmentedColormap('banas_cm',cdict,N=32)
+	
+		
+	
 def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	print('Making plot')
 	fig = Figure(facecolor='white',figsize=(12.0,12.0))
@@ -74,37 +139,50 @@ def plot_profile(data,depth,filename='/Users/lederer/tmp/rompy.profile.png'):
 	
 	FigureCanvas(fig).print_png(filename)
 
-def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',clim=None):
+def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',x_axis_offset=0,clim=None,cmap=None):
 	fig = Figure(facecolor='white')
 	fontsize = 8
 	
-	ax1 = fig.add_axes([0.1, 0.5, 0.75, 0.4])
+	if cmap == 'red_blue':
+		cmap = red_blue_cm()
+	if cmap == 'banas_cm':
+		if len(clim) == 2:
+			cmap = banas_cm(clim[0],clim[0],clim[1],clim[1])
+		elif len(clim) == 4:
+			cmap = banas_cm(clim[0],clim[1],clim[2],clim[3])
+		
+	
+	ax1 = fig.add_axes([0.1, 0.55, 0.75, 0.4])
 	ax2 = fig.add_axes([0.1, 0.1, 0.75, 0.4])
 	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
 	
 	x_axis_as_km = utils.coords_to_km(coords)
 
 	if not clim == None:
-		norm = Normalize(vmin=clim[0],vmax=clim[1],clip=False)
-		sm = ScalarMappable(norm=norm)
-		sm.set_clim(vmin=clim[0],vmax=clim[1])
+		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
+		sm = ScalarMappable(norm=norm,cmap=cmap)
+		sm.set_clim(vmin=clim[0],vmax=clim[-1])
 		sm.set_array(np.array([0]))
 	else:
 		norm = None	
 
-	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm)
-	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm)
+	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
+#	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
 	
 	ax1.fill_between(x_axis_as_km,coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
-	ax1.set_ylim((-20,0))
+#	ax1.set_ylim((-20,ax1.get_ylim()[1]))
+	ax1.set_ylim((-20,2))
 	ax1.set_xlim((0,x_axis_as_km[-1]))
+	for yticklabel in ax1.get_yticklabels():
+		yticklabel.set_fontsize(fontsize)
 	
-	my_plot21 = ax2.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm)
-	my_plot22 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm)
+	my_plot21 = ax2.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
+#	my_plot22 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
 	ax2.fill_between(x_axis_as_km,coords['zm'][0,:],ax2.get_ylim()[0],color='grey')
-	ax2.set_ylim(ax2.get_ylim()[0],-20)
+#	ax2.set_ylim(ax2.get_ylim()[0],-20)
 	ax2.set_xlim((0,x_axis_as_km[-1]))
-	
+	for yticklabel in ax2.get_yticklabels():
+		yticklabel.set_fontsize(fontsize)
 	if clim == None:
 		sm = my_plot11
 	
@@ -115,9 +193,15 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	ax1.set_xticklabels('')
 	
 	if x_axis_style == 'kilometers' or x_axis_style == 'kilometer':
-			tick_list = x_axis_as_km[::n]
-			ax2.set_xticks(tick_list)
-			ax2.set_xticklabels([int(tick) for tick in tick_list],size=fontsize)
+			#tick_list = x_axis_as_km[::n]
+			#ax2.set_xticks(tick_list)
+			#ax2.set_xticklabels([int(tick) for tick in tick_list],size=fontsize)
+			td = 10 #tick_distance
+			
+			ax2.set_xticks(td*np.arange(x_axis_as_km[-1]/td) + (x_axis_offset % td))
+			ax2.set_xticklabels([int(num) for num in np.arange(-int(x_axis_offset - x_axis_offset % td),x_axis_as_km[-1],td)])
+			for xticklabel in ax2.get_xticklabels():
+				xticklabel.set_fontsize(fontsize)
 			ax2.set_xlabel('Kilometers')
 
 	elif x_axis_style == 'stations' or x_axis_style == 'station':
