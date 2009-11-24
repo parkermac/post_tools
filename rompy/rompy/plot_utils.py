@@ -70,8 +70,7 @@ def banas_cm(a,b,c,d):
 		cdict['green'].append((1.0, 0., 0.))
 		cdict['blue'].append((1.0, 0., 0.))
 	
-	print(cdict)
-	return LinearSegmentedColormap('banas_cm',cdict,N=32)
+	return LinearSegmentedColormap('banas_cm',cdict,N=256)
 	
 		
 	
@@ -167,7 +166,7 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 		norm = None	
 
 	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
-#	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
+	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
 	
 	ax1.fill_between(x_axis_as_km,coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
 #	ax1.set_ylim((-20,ax1.get_ylim()[1]))
@@ -177,7 +176,7 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 		yticklabel.set_fontsize(fontsize)
 	
 	my_plot21 = ax2.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
-#	my_plot22 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
+	my_plot22 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
 	ax2.fill_between(x_axis_as_km,coords['zm'][0,:],ax2.get_ylim()[0],color='grey')
 #	ax2.set_ylim(ax2.get_ylim()[0],-20)
 	ax2.set_xlim((0,x_axis_as_km[-1]))
