@@ -1,7 +1,7 @@
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from matplotlib.colors import Normalize, ListedColormap, LinearSegmentedColormap
+from matplotlib.colors import Normalize, ListedColormap, LinearSegmentedColormap, hsv_to_rgb
 from matplotlib.cm import ScalarMappable
 
 from mpl_toolkits.basemap import Basemap
@@ -70,10 +70,71 @@ def banas_cm(a,b,c,d):
 		cdict['green'].append((1.0, 0., 0.))
 		cdict['blue'].append((1.0, 0., 0.))
 	
-	return LinearSegmentedColormap('banas_cm',cdict,N=25)
+	return LinearSegmentedColormap('banas_cm',cdict,N=100)
+
+def banas_hsv_cm(a,b,c,d,n=100):
+	norm = Normalize(vmin=a,vmax=d,clip=False)
+	cdict = {'red':[],'green':[],'blue':[]}
 	
-		
+	aa = norm(a) # 0.0
+	bb = norm(b)
+	cc = norm(c)
+	yy = 0.5*(bb+cc) # yellow is half way between blue and red
+	dd = norm(d) # 1.0
 	
+	center_value = 0.87
+	end_value = 0.65
+	tail_end_value = 0.3
+	
+	blue_hue = 0.55
+	yellow_hue = 1./6.
+	red_hue = 0.04
+	green_hue = 1./3.
+	
+	gg = ((green_hue - blue_hue)/(yellow_hue - blue_hue))*(yy-bb) + bb
+	green_desaturation_width = 0.67
+	green_desaturation_amount = 0.5
+	
+	ii = np.linspace(0.,1.,n)
+	hue = np.zeros(ii.shape)
+	sat = np.ones(ii.shape)
+	val = np.zeros(ii.shape)
+	hsv = np.zeros((1,n,3))
+	
+	for i in range(len(ii)):
+		if ii[i] < bb: # if true then aa is less than bb
+			#hue[i] = blue_hue
+			hsv[0,i,0] = blue_hue
+			#val[i] = tail_end_value*(1 - (ii[i]-aa)/(bb-aa) ) + end_value*( (ii[i]-aa)/(bb-aa) )
+			hsv[0,i,2] = tail_end_value*(1 - (ii[i]-aa)/(bb-aa) ) + end_value*( (ii[i]-aa)/(bb-aa) )
+		elif ii[i] <= yy:
+			hsv[0,i,0] = blue_hue*(1 - (ii[i]-bb)/(yy-bb) ) + yellow_hue*( (ii[i]-bb)/(yy-bb) )
+			hsv[0,i,2] = end_value*(1 - (ii[i]-bb)/(yy-bb) ) + center_value*( (ii[i]-bb)/(yy-bb) )
+		elif ii[i] <= cc:
+			hsv[0,i,0] = yellow_hue*(1 - (ii[i]-yy)/(cc-yy) ) + red_hue*( (ii[i]-yy)/(cc-yy) )
+			hsv[0,i,2] = center_value*(1 - (ii[i]-yy)/(cc-yy) ) + end_value*( (ii[i]-yy)/(cc-yy) )
+		elif ii[i] <= dd:
+			hsv[0,i,0] = red_hue
+			hsv[0,i,2] = end_value*(1 - (ii[i]-cc)/(dd-cc) ) + tail_end_value*( (ii[i]-cc)/(dd-cc) )
+		hsv[0,i,1] = 1.0 - green_desaturation_amount * np.exp(-np.power(ii[i]/(gg*green_desaturation_width),2.0))
+	
+	rgb = hsv_to_rgb(hsv)
+	cdict['red'].append((0.,0.,rgb[0,0,0]))
+	cdict['green'].append((0.,0.,rgb[0,0,1]))
+	cdict['blue'].append((0.,0.,rgb[0,0,2]))
+	
+	for j in range(len(ii)-2):
+		i = j+1
+		cdict['red'].append((ii[i],rgb[0,i,0],rgb[0,i+1,0]))
+		cdict['green'].append((ii[i],rgb[0,i,1],rgb[0,i+1,1]))
+		cdict['blue'].append((ii[i],rgb[0,i,2],rgb[0,i+1,2]))
+
+	cdict['red'].append((1.0,rgb[0,-1,0],rgb[0,-1,0]))
+	cdict['green'].append((1.0,rgb[0,-1,1],rgb[0,-1,1]))
+	cdict['blue'].append((1.0,rgb[0,-1,2],rgb[0,-1,2]))
+	
+	return LinearSegmentedColormap('banas_cm',cdict,N=n)
+
 def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	print('Making plot')
 	fig = Figure(facecolor='white',figsize=(12.0,12.0))
@@ -149,7 +210,11 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 			cmap = banas_cm(clim[0],clim[0],clim[1],clim[1])
 		elif len(clim) == 4:
 			cmap = banas_cm(clim[0],clim[1],clim[2],clim[3])
-		
+	elif cmap == 'banas_hsv_cm':
+		if len(clim) == 2:
+			cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1])
+		elif len(clim) == 4:
+			cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])		
 	
 	ax1 = fig.add_axes([0.1, 0.55, 0.75, 0.4])
 	ax2 = fig.add_axes([0.1, 0.1, 0.75, 0.4])
