@@ -72,18 +72,21 @@ def banas_cm(a,b,c,d):
 	
 	return LinearSegmentedColormap('banas_cm',cdict,N=100)
 
-def banas_hsv_cm(a,b,c,d,n=100):
+def banas_hsv_cm(a,b,c,d,N=100):
 	norm = Normalize(vmin=a,vmax=d,clip=False)
 	cdict = {'red':[],'green':[],'blue':[]}
-	
+	if N >= 100:
+		n = N
+	else:
+		n = 100
 	aa = norm(a) # 0.0
 	bb = norm(b)
 	cc = norm(c)
 	yy = 0.5*(bb+cc) # yellow is half way between blue and red
 	dd = norm(d) # 1.0
 	
-	center_value = 0.87
-	end_value = 0.65
+	center_value = 1.0 # 0.87
+	end_value = 0.8 # 0.65
 	tail_end_value = 0.3
 	
 	blue_hue = 0.55
@@ -101,6 +104,9 @@ def banas_hsv_cm(a,b,c,d,n=100):
 	val = np.zeros(ii.shape)
 	hsv = np.zeros((1,n,3))
 	
+	val_scaler = -(center_value - end_value)/((cc-yy)*(cc-yy))
+	hue_scaler = -(blue_hue - yellow_hue)/((yy-bb)*(yy-bb))
+	
 	for i in range(len(ii)):
 		if ii[i] < bb: # if true then aa is less than bb
 			#hue[i] = blue_hue
@@ -108,15 +114,22 @@ def banas_hsv_cm(a,b,c,d,n=100):
 			#val[i] = tail_end_value*(1 - (ii[i]-aa)/(bb-aa) ) + end_value*( (ii[i]-aa)/(bb-aa) )
 			hsv[0,i,2] = tail_end_value*(1 - (ii[i]-aa)/(bb-aa) ) + end_value*( (ii[i]-aa)/(bb-aa) )
 		elif ii[i] <= yy:
-			hsv[0,i,0] = blue_hue*(1 - (ii[i]-bb)/(yy-bb) ) + yellow_hue*( (ii[i]-bb)/(yy-bb) )
+			#hsv[0,i,0] = blue_hue*(1 - (ii[i]-bb)/(yy-bb) ) + yellow_hue*( (ii[i]-bb)/(yy-bb) )
+			hsv[0,i,0] = hue_scaler*(ii[i] -2*bb + yy)*(ii[i] - yy)+yellow_hue
 			hsv[0,i,2] = end_value*(1 - (ii[i]-bb)/(yy-bb) ) + center_value*( (ii[i]-bb)/(yy-bb) )
 		elif ii[i] <= cc:
 			hsv[0,i,0] = yellow_hue*(1 - (ii[i]-yy)/(cc-yy) ) + red_hue*( (ii[i]-yy)/(cc-yy) )
-			hsv[0,i,2] = center_value*(1 - (ii[i]-yy)/(cc-yy) ) + end_value*( (ii[i]-yy)/(cc-yy) )
+			#hsv[0,i,2] = center_value*(1 - (ii[i]-yy)/(cc-yy) ) + end_value*( (ii[i]-yy)/(cc-yy) )
+			hsv[0,i,2] = val_scaler*(ii[i] -2*yy + cc)*(ii[i] - cc)+end_value
 		elif ii[i] <= dd:
 			hsv[0,i,0] = red_hue
 			hsv[0,i,2] = end_value*(1 - (ii[i]-cc)/(dd-cc) ) + tail_end_value*( (ii[i]-cc)/(dd-cc) )
-		hsv[0,i,1] = 1.0 - green_desaturation_amount * np.exp(-np.power(ii[i]/(gg*green_desaturation_width),2.0))
+		hsv[0,i,1] = 1.0 - green_desaturation_amount * np.exp(-np.power(3.0*(ii[i]-gg)/((cc-bb)*green_desaturation_width),2.0))
+	
+
+#	plt.plot(np.linspace(a,d,n),hsv[0,:,0],'r',np.linspace(a,d,n),hsv[0,:,1],'g',np.linspace(a,d,n),hsv[0,:,2],'b')
+#	plt.show()
+	
 	
 	rgb = hsv_to_rgb(hsv)
 	cdict['red'].append((0.,0.,rgb[0,0,0]))
@@ -133,7 +146,7 @@ def banas_hsv_cm(a,b,c,d,n=100):
 	cdict['green'].append((1.0,rgb[0,-1,1],rgb[0,-1,1]))
 	cdict['blue'].append((1.0,rgb[0,-1,2],rgb[0,-1,2]))
 	
-	return LinearSegmentedColormap('banas_cm',cdict,N=n)
+	return LinearSegmentedColormap('banas_cm',cdict,N=N)
 
 def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	print('Making plot')
@@ -206,15 +219,19 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	if cmap == 'red_blue':
 		cmap = red_blue_cm()
 	if cmap == 'banas_cm':
-		if len(clim) == 2:
+		if clim==None:
+			cmap = banas_cm(np.min(data[:]),np.min(data[:]),np.max(data[:]),np.max(data[:]))
+		elif len(clim) == 2:
 			cmap = banas_cm(clim[0],clim[0],clim[1],clim[1])
 		elif len(clim) == 4:
 			cmap = banas_cm(clim[0],clim[1],clim[2],clim[3])
 	elif cmap == 'banas_hsv_cm':
-		if len(clim) == 2:
-			cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1])
+		if clim==None:
+			cmap = banas_hsv_cm(np.min(data[:]),np.min(data[:]),np.max(data[:]),np.max(data[:]))
+		elif len(clim) == 2:
+			cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1],N=20)
 		elif len(clim) == 4:
-			cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])		
+			cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
 	
 	ax1 = fig.add_axes([0.1, 0.55, 0.75, 0.4])
 	ax2 = fig.add_axes([0.1, 0.1, 0.75, 0.4])

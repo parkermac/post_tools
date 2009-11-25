@@ -14,9 +14,10 @@ map3 = False
 map4 = False
 map5 = False
 map6 = False
-map7 = True
-map8 = True
+map7 = False
+map8 = False
 map9 = False
+map10 = True
 
 if map1:
 	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='zeta')
@@ -134,8 +135,37 @@ if map8: # Hood Canal
 	plot_utils.plot_mickett(coords=coords, data=data, varname='Temperature', region='Hood Canal', filename='/Users/lederer/tmp/rompy.mickett_hood_temp.png', n=n, x_axis_offset=utils.offset_region(coords), clim=[6,18], cmap='banas_hsv_cm')
 
 if map9: # velocity in Hood Canal
-	n=3
+	n=1
 	x,y = utils.high_res_hood_canal_xy(n=n)
 	(u, coords) = rompy.extract('ocean_his_1000.nc',varname='u',extraction_type='profile',x=x,y=y)
 	(v, coords) = rompy.extract('ocean_his_1000.nc',varname='v',extraction_type='profile',x=x,y=y)
-	plot_utils.plot_mickett(coords=coords,data=np.sqrt(u*u + v*v),varname='U',region='Hood Canal',filename='/Users/lederer/tmp/rompy.mickett_hood_u.png',n=n,clim=[-2,2],cmap='red_blue')
+	data = np.zeros(u.shape)
+
+	for i in range(u.shape[1]):
+		if i == u.shape[1]-1:
+			x_vec = np.array([x[i] - x[i-1], y[i] - y[i-1]])
+		else:
+			x_vec = np.array([x[i+1] - x[i], y[i+1] - y[i]])
+		for j in range(u.shape[0]):
+			u_vec = np.array([u[j,i], v[j,i]])
+			data[j,i] = np.dot(x_vec,u_vec)/(np.sqrt(np.dot(x_vec,x_vec)))
+	
+	plot_utils.plot_mickett(coords=coords,data=data,varname='U', region='Hood Canal', filename='/Users/lederer/tmp/rompy.mickett_hood_U.png', n=n, clim=[-2,2], x_axis_offset=utils.offset_region(coords),cmap='red_blue')
+
+if map10: # velocity in Main Basin
+	n=3
+	x,y = utils.high_res_main_basin_xy(n=n)
+	(u, coords) = rompy.extract('ocean_his_1000.nc',varname='u',extraction_type='profile',x=x,y=y)
+	(v, coords) = rompy.extract('ocean_his_1000.nc',varname='v',extraction_type='profile',x=x,y=y)
+	data = np.zeros(u.shape)
+
+	for i in range(u.shape[1]):
+		if i == u.shape[1]-1:
+			x_vec = np.array([x[i] - x[i-1], y[i] - y[i-1]])
+		else:
+			x_vec = np.array([x[i+1] - x[i], y[i+1] - y[i]])
+		for j in range(u.shape[0]):
+			u_vec = np.array([u[j,i], v[j,i]])
+			data[j,i] = np.dot(x_vec,u_vec)/(np.sqrt(np.dot(x_vec,x_vec)))
+	
+	plot_utils.plot_mickett(coords=coords,data=data,varname='U', region=' Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_U.png', n=n, clim=[-2,2], x_axis_offset=utils.offset_region(coords),cmap='red_blue')
