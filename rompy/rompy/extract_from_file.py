@@ -20,10 +20,8 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 	ncvar = ncf.variables[varname]
 	dims = ncvar.dimensions
 	ndims = len(dims)
-	print('dims: %s' % str(dims))
 	shape = ncvar.shape
-	print('shape: %s' % str(shape))
-	
+	print('var: %s, dims: %s, shape: %s' %(varname, str(dims), str(shape)))
 	if not ndims == 3 and not ndims == 4:
 		raise TypeError('ndims is neither 3 nor 4')
 	if not dims[0] == 'ocean_time':
@@ -173,30 +171,11 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 		
 		elif (extraction_type == 'profile' or extraction_type == 'profiles') \
 							and kwargs.has_key('x') and kwargs.has_key('y'):
-			# get zeta		
-			try:
-				if dims[2] == 'eta_rho' and dims[3] == 'xi_rho':
-					zeta2 = ncf.variables['zeta'][:]
-				else:
-					zeta2 = utils.interp_2d_xy(y=lat,x=lon,data=ncf.variables['zeta'][:],yi=y2,xi=x2)
-			except Exception, e:
-				print(e)
-				zeta2 = np.zeros((len(y2),len(x2)))
-			zeta2[zeta2>1000] = 0
-	
-			# get H
-			if dims[2] == 'eta_rho' and dims[3] == 'xi_rho':
-				H2 = grid['H'][:]
-			else:
-				H2 = utils.interp_2d_xy(y=lat,x=lon,data=grid['H'][:],yi=y2,xi=x2)
 			
 			x3 = np.tile(x2.reshape(1, J, I),(K,1,1))
 			y3 = np.tile(y2.reshape(1, J, I),(K,1,1))
 			mask3 = np.tile(mask2.reshape(1, J, I),(K,1,1))
-			zeta3 = np.tile(zeta2.reshape(1, J, I),(K,1,1))
-			H3 = np.tile(H2.reshape(1, J, I),(K,1,1))
 			cs3 = np.tile(cs.reshape(K,1,1),(1,J,I))
-			z3 = zeta3 + cs3*(zeta3 + H3)
 			
 			# TODO: add a bunch of code that takes the x an y and makes the appropriate xi, yi, zi 3d matricies for interpolation with utils.interp_3d()
 			x = kwargs['x']
@@ -217,17 +196,15 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 			zetai = np.zeros(x.shape)
 			Hi = np.zeros(x.shape)
 			for i in range(len(x)):
-				zetai[i] = utils.interp_2d_xy(x=lon,y=lat,data=np.squeeze(ncf.variables['zeta'][:]),yi=y[i],xi=x[i])
-				Hi[i] = utils.interp_2d_xy(x=lon,y=lat,data=np.squeeze(grid['H'][:]),yi=y[i],xi=x[i])
+				zetai[i] = utils.interp_2d(x=lon,y=lat,data=np.squeeze(ncf.variables['zeta'][:]),yi=y[i],xi=x[i])
+				Hi[i] = utils.interp_2d(x=lon,y=lat,data=np.squeeze(grid['H'][:]),yi=y[i],xi=x[i])
 			z = zetai + zi*(zetai + Hi)
-#			print('xi') 
-# 			print(xi)
-# 			print('yi')
-# 			print(yi)
-# 			print('zi')
-# 			print(zi)
+
 			data = utils.interp_3d(x=x3,y=y3,z=cs3,data=np.squeeze(ncvar[:]),xi=xi,yi=yi,zi=zi)
-			data[data>100] = 0.
+#			data = np.ma.array(data,mask=(data>100))
+			data = np.ma.array(data,mask=(z>100))
+#			data[data>100] = 0.
+			z[z>100] = 0.0
 #			print(data)
 			xm = x
 			ym = y

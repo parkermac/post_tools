@@ -1,9 +1,9 @@
 import numpy as np
 from matplotlib.mlab import griddata
 
-def interp_2d(lat,lon,data,lati,loni):
+def interp_2d_latlon(lat,lon,data,lati,loni):
 	return griddata(lat.reshape(lat.size),lon.reshape(lon.size),data.reshape(data.size),lati,loni)
-	
+
 def interp_2d_xy(x,y,data,xi,yi):
 	try:
 		di = griddata(x.reshape(x.size),y.reshape(y.size),data.reshape(data.size),xi,yi)
@@ -37,6 +37,72 @@ def interp_2d_xy(x,y,data,xi,yi):
 	
 		di = w0*(1-xd) + w1*xd
 	return di
+
+def interp_2d_point(x,y,d,xi,yi):
+	if not x.ndim == 1 or not y.ndim == 1:
+		raise(TypeError,'interp_2d_from_point needs the x and y to be vectors')
+	if not xi.size == 1 or not yi.size == 1:
+		print(xi,yi,zi)
+		raise(TypeError, 'interp_2d_from_point needs xi and yi to be a single value')
+	try:
+		xl = np.nonzero(x <= xi)[0][-1]
+		xh = np.nonzero(xi <= x)[0][0]
+		yl = np.nonzero(y <= yi)[0][-1]
+		yh = np.nonzero(yi <= y)[0][0]
+	except IndexError, e:
+		print('x, xi')
+		print(x,xi)
+		print('y, yi')
+		print(y,yi)
+	
+	if not x[xl] == x[xh]:
+		xd = (xi-x[xh])/(x[xl]-x[xh])
+	else:
+		xd = 1.
+	if not y[yl] == y[yh]:
+		yd = (yi-y[yh])/(y[yl]-y[yh])
+	else:
+		yd = 1.
+	
+	w0 = d[yl,xl]*(1-yd) + d[yh,xl]*yd
+	w1 = d[yl,xh]*(1-yd) + d[yh,xh]*yd
+	
+	return w0*(1-xd) + w1*xd
+
+def interp_2d_from_list_of_points(x,y,z,d,p_list):
+	di = np.zeros(len(p_list),1)
+	for i in range(len(p_list)):
+		di[i] = interp_2d_point(x,y,d,p_list[i][0],p_list[i][1])
+	return di
+
+def interp_2d(x,y,data,xi,yi):
+	if x.shape == y.shape and x.shape == data.shape:
+		# assume x and y are the same everywhere in their respective dimension
+		if x.ndim == 2:
+			x_vec = x[0,:]
+		else:
+			x_vec = x
+		if y.ndim == 2:
+			y_vec = y[:,0]
+		else:
+			y_vec = y
+		
+		# assume xi and yi are vectors
+		if xi.ndim == 1 and yi.ndim == 1:
+			di = np.zeros((len(yi),len(xi)))
+			for i in range(len(xi)):
+				for j in range(len(yi)):
+					di[j,i] = interp_2d_point(x_vec,y_vec,data,xi[i],yi[j])
+
+		# if xi and yi are not vectors, then lets just do everything on a point by point basis.
+		elif xi.shape == yi.shape:
+			di = np.zeros(xi.shape)
+			for i in range(xi.size):
+				di.flat[i] = interp_2d_point(x_vec,y_vec,data,xi.flat[i],yi.flat[i])
+		return di
+		
+	else:#elif (len(x),len(y)) == data.shape:
+		print('Do this the other way')
 
 def interp_3d_point(x,y,z,d,xi,yi,zi):
 	if not x.ndim == 1 or not y.ndim == 1 or not z.ndim == 1:
