@@ -19,16 +19,16 @@ map8 = False
 map9 = False
 map10 = False
 
-# map1 = True
-# map2 = True
-# map3 = True
-# map4 = True
-# map5 = True
-# map6 = True
-map7 = True
-map8 = True
-# map9 = True
-# map10 = True
+#map1 = True
+#map2 = True
+#map3 = True
+#map4 = True
+#map5 = True
+#map6 = True
+#map7 = True
+#map8 = True
+map9 = True
+#map10 = True
 
 if map1:
 	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='zeta')
@@ -119,21 +119,21 @@ if map6:
 	FigureCanvas(fig).print_png('/Users/lederer/tmp/rompy.map6.png')
 
 if map7: # Main Basin
-	n = 5
+	n = 10
 	x,y = utils.high_res_main_basin_xy(n=n)
 	
 	# Salinity
 	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='salt', extraction_type='profile', x=x, y=y)
 	
-	plot_utils.plot_mickett(coords=coords, data=data, varname='Salinity', region='Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_salt.png', n=n, x_axis_offset=utils.offset_region(coords), clim=[0,20,32,32],cmap='banas_hsv_cm')
+	plot_utils.plot_mickett(coords=coords, data=data, varname='Salinity', region='Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_salt.png', n=n, x_axis_offset=utils.offset_region(coords), clim=[0,20,32,32], cmap='banas_hsv_cm', labeled_contour_gap=2)
 	
 	# Temperature
 	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='temp',extraction_type='profile',x=x,y=y)
 	
-	plot_utils.plot_mickett(coords=coords, data=data, varname='Temperature', region='Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_temp.png', n=n,  x_axis_offset=utils.offset_region(coords), clim=[0,20], cmap='banas_hsv_cm')
+	plot_utils.plot_mickett(coords=coords, data=data, varname='Temperature', region='Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_temp.png', n=n,  x_axis_offset=utils.offset_region(coords), clim=[0,20], cmap='banas_hsv_cm', labeled_contour_gap=2)
 
 if map8: # Hood Canal
-	n=5
+	n=10
 	x,y = utils.high_res_hood_canal_xy(n=n)
 	# Salinity
 	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='salt', extraction_type='profile', x=x, y=y)
@@ -146,7 +146,7 @@ if map8: # Hood Canal
 	plot_utils.plot_mickett(coords=coords, data=data, varname='Temperature', region='Hood Canal', filename='/Users/lederer/tmp/rompy.mickett_hood_temp.png', n=n, x_axis_offset=utils.offset_region(coords), clim=[0,20], cmap='banas_hsv_cm')
 
 if map9: # velocity in Hood Canal
-	n=1
+	n=20
 	x,y = utils.high_res_hood_canal_xy(n=n)
 	(u, coords) = rompy.extract('ocean_his_1000.nc',varname='u',extraction_type='profile',x=x,y=y)
 	(v, coords) = rompy.extract('ocean_his_1000.nc',varname='v',extraction_type='profile',x=x,y=y)
@@ -160,6 +160,8 @@ if map9: # velocity in Hood Canal
 		for j in range(u.shape[0]):
 			u_vec = np.array([u[j,i], v[j,i]])
 			data[j,i] = np.dot(x_vec,u_vec)/(np.sqrt(np.dot(x_vec,x_vec)))
+	
+	data = np.ma.array(data, mask=np.abs(data) > 100)
 	
 	plot_utils.plot_mickett(coords=coords,data=data,varname='U', region='Hood Canal', filename='/Users/lederer/tmp/rompy.mickett_hood_U.png', n=n, clim=[-2,2], x_axis_offset=utils.offset_region(coords),cmap='red_blue')
 
@@ -178,5 +180,7 @@ if map10: # velocity in Main Basin
 		for j in range(u.shape[0]):
 			u_vec = np.array([u[j,i], v[j,i]])
 			data[j,i] = np.dot(x_vec,u_vec)/(np.sqrt(np.dot(x_vec,x_vec)))
+	
+	data = np.ma.array(data, mask=np.abs(data) > 100)
 	
 	plot_utils.plot_mickett(coords=coords,data=data,varname='U', region=' Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_U.png', n=n, clim=[-2,2], x_axis_offset=utils.offset_region(coords),cmap='red_blue')

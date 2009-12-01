@@ -84,7 +84,6 @@ def banas_hsv_cm(a,b,c,d,N=100):
 	cc = norm(c)
 	yy = 0.5*(bb+cc) # yellow is half way between blue and red
 	dd = norm(d) # 1.0
-	
 	center_value = 0.87
 	end_value = 0.65
 	tail_end_value = 0.3
@@ -160,12 +159,13 @@ def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	ax.grid()
 	FigureCanvas(fig).print_png(filename)
 
-def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='i'):
-	fig = Figure(facecolor='white',figsize=(24.0,24.0))
+def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='i',clim=None):
+	fig = Figure(facecolor='white',figsize=(12.0,12.0))
 #	ax = fig.add_subplot(111)
 	longest_side_size = 24.0
-	ax = fig.add_axes((0.,0.,1.,1.),axisbg='grey')
-	
+	#ax = fig.add_axes((0.,0.,1.,1.),axisbg='grey')
+	ax = fig.add_axes((0.,0.,0.85,1.),axisbg='grey')
+	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
 	lllat = np.min(lat)
 	urlat = np.max(lat)
 	lllon = np.min(lon)
@@ -197,9 +197,21 @@ def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution
 # 	print(bbox.xmin, bbox.xmax, bbox.ymin, bbox.ymax)
 # 	
 # 	
-	m.pcolormesh(x,y,data)
+	if clim==None:
+		cmap = banas_hsv_cm(np.min(data[:]),np.min(data[:]),np.max(data[:]),np.max(data[:]))
+		norm = Normalize(vmin=np.min(data[:]),vmax=np.max(data[:]),clip=False)
+	elif len(clim) == 2:
+		cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1],N=20)
+		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
+	elif len(clim) == 4:
+		cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
+		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
+		
+	pcm = m.pcolormesh(x,y,data,cmap=cmap,norm=norm)
 	m.drawcoastlines(linewidth=0.5)
-
+	
+	my_colorbar = fig.colorbar(pcm,cax=cax)
+	
 	FigureCanvas(fig).print_png(filename)
 
 def plot_profile(data,depth,filename='/Users/lederer/tmp/rompy.profile.png'):
@@ -238,6 +250,7 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
 	
 	x_axis_as_km = utils.coords_to_km(coords)
+	station_locations = x_axis_as_km[0:-1:n]
 	
 	if not clim == None:
 		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
@@ -261,6 +274,8 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 		my_plot13 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,solid_contours,colors='k',linewidths=0.5)
 		ax1.clabel(my_plot13,inline=True,fmt=contour_label_fmt,fontsize=fontsize)
 #		ax1.set_xlim(ax1_xlim)
+
+	my_plot14 = ax1.plot(station_locations, 1.5*np.ones(len(station_locations)),'v',color='grey')
 	
 	ax1.fill_between(x_axis_as_km,coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
 #	ax1.set_ylim((-20,ax1.get_ylim()[1]))
@@ -268,6 +283,8 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	ax1.set_xlim((0,x_axis_as_km[-1]))
 	for yticklabel in ax1.get_yticklabels():
 		yticklabel.set_fontsize(fontsize)
+	
+	
 	
 	my_plot21 = ax2.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
 	my_plot22 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
@@ -293,7 +310,8 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	
 	ax1.set_title('%s %s from a ROMS run' % (region,varname))
 	ax1.set_ylabel('depth in meters',position=(0.05,0))
-	ax1.set_xticks(10*np.arange(x_axis_as_km[-1]/10))
+#	ax1.set_xticks(10*np.arange(x_axis_as_km[-1]/10))
+	ax1.set_xticks(station_locations)
 	ax1.set_xticklabels('')
 	
 	if x_axis_style == 'kilometers' or x_axis_style == 'kilometer':

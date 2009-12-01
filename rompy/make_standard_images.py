@@ -45,6 +45,7 @@ def hood_canal_U_curtain(file,img_file,n=1,clim=None): # velocity in Hood Canal
 		for j in range(u.shape[0]):
 			u_vec = np.array([u[j,i], v[j,i]])
 			data[j,i] = np.dot(x_vec,u_vec)/(np.sqrt(np.dot(x_vec,x_vec)))
+	
 	data = np.ma.array(data, mask=np.abs(data) > 100)
 	plot_utils.plot_mickett(coords=coords,data=data,varname='U', region='Hood Canal', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords), cmap='red_blue', labeled_contour_gap=0.5)
 
@@ -63,6 +64,7 @@ def main_basin_U_curtain(file,img_file,n=1,clim=None): # velocity in Main Basin
 			u_vec = np.array([u[j,i], v[j,i]])
 			data[j,i] = np.dot(x_vec,u_vec)/(np.sqrt(np.dot(x_vec,x_vec)))
 	
+	data = np.ma.array(data, mask=np.abs(data) > 100)
 	plot_utils.plot_mickett(coords=coords,data=data,varname='U', region=' Main Basin', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords),cmap='red_blue', labeled_contour_gap=0.5)
 
 
