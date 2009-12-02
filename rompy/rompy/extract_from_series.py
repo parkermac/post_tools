@@ -16,6 +16,9 @@ def file_time(f):
 	offset = dt.timedelta(seconds=ot[0][0])
 	ncf.close()
 	return base_time + offset
+def file_timestamp(f):
+	t = file_time(f)
+	return time.mktime(t.timetuple())
 
 def calc_num_time_slices(file1,file2,td):
 	d1 = file_time(file1)
@@ -105,18 +108,21 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',freq=dt
 			
 			# start getting data
 			d,junk = extract_from_file.extract_from_file(file_list[i],varname=varname,extraction_type='profile',x=x,y=y)
+			
 			if data == None:
 				data = np.zeros((d.shape[0],len(file_list)))
 			data[:,i] = d.T
+			
 			if z == None:
 				z = np.zeros(data.shape)
 			z[:,i] = junk['zm'].T
-			if ocean_time == None:
-				ocean_time = []
+			
 #				ocean_time = np.zeros(data.shape)
-			tmp_time = file_time(file)
-			for j in range(data.shape[1]):
-				ocean_time[j][i] = tmp_time
-		
+			if ocean_time == None:
+				ocean_time = np.zeros(data.shape)
+			ot = file_timestamp(file_list[i])
+#			ot = file_time(file)
+			for j in range(data.shape[0]):
+				ocean_time[j,i] = ot
 		return (data, ocean_time,z)
 	return
