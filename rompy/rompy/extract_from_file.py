@@ -21,7 +21,7 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 	dims = ncvar.dimensions
 	ndims = len(dims)
 	shape = ncvar.shape
-	print('var: %s, dims: %s, shape: %s' %(varname, str(dims), str(shape)))
+#	print('var: %s, dims: %s, shape: %s' %(varname, str(dims), str(shape)))
 	if not ndims == 3 and not ndims == 4:
 		raise TypeError('ndims is neither 3 nor 4')
 	if not dims[0] == 'ocean_time':
@@ -217,4 +217,6 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 			coords['ym'] = ym
 		if len(zm) > 0:
 			coords['zm'] = zm
+	grid['ncfile'].close()
+	ncf.close()
 	return (data,coords)

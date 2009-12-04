@@ -21,6 +21,7 @@ of wasted memory.
 	ncf = nc.Dataset(f,mode='r')
 	
 	G = {}
+	G['ncfile'] = ncf
 	G['lon'] = ncf.variables['lon_rho']
 	G['lat'] = ncf.variables['lat_rho']
 	G['lonu'] = ncf.variables['lon_u']

@@ -160,7 +160,7 @@ def interp_3d_from_list_of_points(x,y,z,d,p_list):
 def interp_3d(x,y,z,data,xi,yi,zi):
 	# we make a lot of assumptions about the incoming data. this is not a universal interpn
 	if x.shape == y.shape and x.shape == z.shape and x.shape == data.shape:
-		print('Do this the hard way')
+		#print('Do this the hard way')
 		# assume x, y, and z are the same everywhere in their respective dimension
 		if x.ndim == 3:
 			x_vec = x[0,0,:]
@@ -185,7 +185,7 @@ def interp_3d(x,y,z,data,xi,yi,zi):
 
 		# if xi, yi, and zi are not vectors, then lets just do everything on a point by point basis.
 		elif xi.shape == yi.shape and xi.shape == zi.shape:
-			print("I'm in the right place")
+			#print("I'm in the right place")
 			di = np.zeros(xi.shape)
 			for i in range(xi.size):
 				di.flat[i] = interp_3d_point(x_vec,y_vec,z_vec,data,xi.flat[i],yi.flat[i],zi.flat[i])
@@ -327,6 +327,9 @@ def station_to_lat_lon(station_list):
 	lat_dict = {}
 	lon_dict = {}
 	
+	lat_dict[4] = 48.2425
+	lon_dict[4] = -122.542
+	
 	lat_dict[6] = 47.925
 	lon_dict[6] = -122.4685
 	
@@ -412,7 +415,10 @@ def station_to_lat_lon(station_list):
 
 	lat_dict[33] = 47.3198
 	lon_dict[33] = -122.5008
-
+	
+	lat_dict[34] = 47.2869
+	lon_dict[34] = -122.5391
+	
 	lat_dict[401] = 47.49
 	lon_dict[401] = -123.0567
 

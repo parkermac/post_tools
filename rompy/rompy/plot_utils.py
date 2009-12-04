@@ -1,14 +1,28 @@
+import datetime as dt
+
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.colors import Normalize, ListedColormap, LinearSegmentedColormap, hsv_to_rgb
 from matplotlib.cm import ScalarMappable
+from matplotlib import ticker
 
 from mpl_toolkits.basemap import Basemap
 import numpy as np
 import matplotlib.pyplot as plt
 
 import utils
+
+def time_series_formatter(x,pos=None):
+	return dt.datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M')
+
+def map_varname(v):
+	mapping = {
+		'temp':'Temperature',
+		'salt':'Salinity',
+		'U':'Velocity',
+		}
+	return mapping[v]
 
 def red_blue_cm():
 	cdict = {'red':		[(0.0, 0.0, 0.0),
@@ -147,6 +161,31 @@ def banas_hsv_cm(a,b,c,d,N=100):
 	
 	return LinearSegmentedColormap('banas_cm',cdict,N=N)
 
+def make_cmap_sm_norm(d=None,clim=None,cmap=None):
+	if cmap == 'red_blue':
+		cmap = red_blue_cm()
+	if cmap == 'banas_cm':
+		if clim==None:
+			cmap = banas_cm(np.min(d[:]),np.min(d[:]),np.max(d[:]),np.max(d[:]))
+		elif len(clim) == 2:
+			cmap = banas_cm(clim[0],clim[0],clim[1],clim[1])
+		elif len(clim) == 4:
+			cmap = banas_cm(clim[0],clim[1],clim[2],clim[3])
+	elif cmap == 'banas_hsv_cm':
+		if clim==None:
+			cmap = banas_hsv_cm(np.min(d[:]),np.min(d[:]),np.max(d[:]),np.max(d[:]))
+		elif len(clim) == 2:
+			cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1],N=20)
+		elif len(clim) == 4:
+			cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
+	
+	norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
+	sm = ScalarMappable(norm=norm,cmap=cmap)
+	sm.set_clim(vmin=clim[0],vmax=clim[-1])
+	sm.set_array(np.array([0]))
+
+	return cmap,sm,norm
+
 def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	print('Making plot')
 	fig = Figure(facecolor='white',figsize=(12.0,12.0))
@@ -228,22 +267,7 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	fig = Figure(facecolor='white')
 	fontsize = 8
 	
-	if cmap == 'red_blue':
-		cmap = red_blue_cm()
-	if cmap == 'banas_cm':
-		if clim==None:
-			cmap = banas_cm(np.min(data[:]),np.min(data[:]),np.max(data[:]),np.max(data[:]))
-		elif len(clim) == 2:
-			cmap = banas_cm(clim[0],clim[0],clim[1],clim[1])
-		elif len(clim) == 4:
-			cmap = banas_cm(clim[0],clim[1],clim[2],clim[3])
-	elif cmap == 'banas_hsv_cm':
-		if clim==None:
-			cmap = banas_hsv_cm(np.min(data[:]),np.min(data[:]),np.max(data[:]),np.max(data[:]))
-		elif len(clim) == 2:
-			cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1],N=20)
-		elif len(clim) == 4:
-			cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
+	cmap,sm,norm =  make_cmap_sm_norm(d=data,clim=clim,cmap=cmap)
 	
 	ax1 = fig.add_axes([0.1, 0.55, 0.75, 0.4])
 	ax2 = fig.add_axes([0.1, 0.1, 0.75, 0.4])
@@ -251,15 +275,15 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	
 	x_axis_as_km = utils.coords_to_km(coords)
 	station_locations = x_axis_as_km[0:-1:n]
-	
-	if not clim == None:
-		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
-		sm = ScalarMappable(norm=norm,cmap=cmap)
-		sm.set_clim(vmin=clim[0],vmax=clim[-1])
-		sm.set_array(np.array([0]))
-	else:
-		norm = None	
-	
+# 	
+# 	if not clim == None:
+# 		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
+# 		sm = ScalarMappable(norm=norm,cmap=cmap)
+# 		sm.set_clim(vmin=clim[0],vmax=clim[-1])
+# 		sm.set_array(np.array([0]))
+# 	else:
+# 		norm = None	
+# 	
 	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
 	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
 	
@@ -301,8 +325,8 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	ax2.set_xlim((0,x_axis_as_km[-1]))
 	for yticklabel in ax2.get_yticklabels():
 		yticklabel.set_fontsize(fontsize)
-	if clim == None:
-		sm = my_plot11
+# 	if clim == None:
+# 		sm = my_plot11
 	
 	my_colorbar = fig.colorbar(sm,cax=cax)
 	if labeled_contour_gap is not None:
@@ -343,4 +367,43 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
  		ax2.set_xticklabels('')
 		ax2.set_xlabel('Kilometers')
 	
+	FigureCanvas(fig).print_png(filename)
+
+def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_series_profile.png',clim=None,cmap='banas_hsv_cm',varname=None):
+	
+	fontsize = 8
+	
+	cmap,sm,norm = make_cmap_sm_norm(d=d,clim=clim,cmap=cmap)
+	
+	
+	fig = Figure(facecolor='white')
+	ax1 = fig.add_axes([0.1, 0.55, 0.75, 0.32])
+	ax2 = fig.add_axes([0.1, 0.18, 0.75, 0.32])
+	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
+	
+	my_plot11 = ax1.contourf(t,z,d,100,norm=norm,cmap=cmap)
+	my_plot12 = ax1.contour(t,z,d,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
+	my_plot21 = ax2.contourf(t,z,d,100,norm=norm,cmap=cmap)
+	my_plot22 = ax2.contour(t,z,d,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
+
+	my_colorbar = fig.colorbar(sm,cax=cax)
+	
+	ax1.set_ylim(-20,2)
+	ax1.set_xlim(t[0][0],t[-1][-1])
+	for yticklabel in ax1.get_yticklabels():
+			yticklabel.set_fontsize(fontsize)
+	ax1.set_xticklabels('')
+	
+	ax2.set_xlim(t[0][0],t[-1][-1])
+	ax2.set_ylim(np.min(z[0,:]),np.max(z[-1,:]))
+	for yticklabel in ax2.get_yticklabels():
+			yticklabel.set_fontsize(fontsize)
+	locs = ax2.get_xticks()
+	new_labels = []
+	ax2.xaxis.set_major_formatter(ticker.FuncFormatter(time_series_formatter))
+	for label in ax2.get_xticklabels():
+		label.set_ha('right')
+		label.set_rotation(30)
+	
+	ax1.set_title('%s Over Time at a Point'% map_varname(varname))
 	FigureCanvas(fig).print_png(filename)

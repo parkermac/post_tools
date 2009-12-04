@@ -1,6 +1,7 @@
 import os
 import datetime as dt
 import time
+import glob
 
 import pytz
 import netCDF4 as nc
@@ -16,6 +17,7 @@ def file_time(f):
 	offset = dt.timedelta(seconds=ot[0][0])
 	ncf.close()
 	return base_time + offset
+
 def file_timestamp(f):
 	t = file_time(f)
 	return time.mktime(t.timetuple())
@@ -35,23 +37,60 @@ def calc_num_time_slices(file1,file2,td):
 	print(gap_seconds, tgap)
 	
 	return int(gap_seconds/td_seconds + 1)
-	
 
-def extract_from_series(file_list,extraction_type='point',varname='zeta',freq=dt.timedelta(seconds=600),**kwargs):
+def filelist_from_datelist(datelist, basedir='/Users/lederer/Repositories/PSVS/rompy/', basename='ocean_his_*.nc'):
+	files = glob.glob(os.path.join(basedir,basename))
+	files.sort()
+	
+	master_file_list = []
+	master_timestamp_list = []
+	master_datetime_list = []
+	timelist = []
+	returnlist = []
+	
+	for file in files:
+		master_file_list.append(file)
+		master_timestamp_list.append(file_timestamp(file))
+		master_datetime_list.append(file_time(file))
+	
+	tsarray = np.array(master_timestamp_list)
+
+	for d in datelist:
+		try:
+			t = time.mktime(d.timetuple())
+			timelist.append(t)
+			tl = np.nonzero(tsarray <= t)[0][-1]
+			th = np.nonzero(t <= tsarray)[0][0]
+			if not tl == th:
+				fraction = (t-tsarray[th])/(tsarray[tl]-tsarray[th])
+			else:
+				fraction = 0.0
+			
+			returnlist.append({
+							'file0': master_file_list[tl],
+							'file1': master_file_list[th],
+							'fraction': fraction,
+							'timestamp':t,
+							'datetime':d
+							})
+		except IndexError, e:
+			print('Index out of bounds for %s' % (d.isoformat()))
+			
+	return returnlist
+
+def extract_from_series(file_list,extraction_type='point',varname='zeta',**kwargs):
 	UTC = pytz.timezone('UTC')
 	pacific = pytz.timezone('US/Pacific')
 	
-	print('Hello from extractFromSeries')
+	#print('Hello from extractFromSeries')
 	
 	if extraction_type == 'point':
 		# assume var is a 2d var for now
 		file_list.sort()
-		ntimes = calc_num_time_slices(file_list[0],file_list[-1],freq)
 		
 		x = kwargs['x']
 		y = kwargs['y']
 		
-		print(x,y,ntimes)
 		data = np.zeros((len(file_list),len(x)))
 		for i in range(len(x)):	
 			data[0,i],junk = extract_from_file.extract_from_file(file_list[0],varname=varname,extraction_type='point',x=x[i],y=y[i])
@@ -73,7 +112,6 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',freq=dt
 	if extraction_type == 'profile':
 		
 		file_list.sort()
-		ntimes = calc_num_time_slices(file_list[0],file_list[-1],freq)
 		
 		ocean_time = None
 		
@@ -101,12 +139,8 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',freq=dt
 			
 			if varname not in ncf.variables:
 				raise IOError('File %s does not have a variable named %s' % (file, varname))
-						
-			#dstart = ncf.variable['dstart']
-			#print(ocean_time)
-			#print(dstart)
+			ncf.close()
 			
-			# start getting data
 			d,junk = extract_from_file.extract_from_file(file_list[i],varname=varname,extraction_type='profile',x=x,y=y)
 			
 			if data == None:
@@ -126,3 +160,43 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',freq=dt
 				ocean_time[j,i] = ot
 		return (data, ocean_time,z)
 	return
+
+def extract_from_datetime_list(datelist,x,y,varname='salt',**kwargs):
+	filelist = filelist_from_datelist(datelist)
+	for f in filelist:
+		(d0,ot0,z0) = extract_from_series([f['file0']],x=x,y=y,varname=varname,extraction_type='profile',**kwargs)
+		(d1,ot1,z1) = extract_from_series([f['file1']],x=x,y=y,varname=varname,extraction_type='profile',**kwargs)
+		
+		di = np.zeros(d0.shape)
+		oti = np.zeros(d0.shape)
+		zi = np.zeros(d0.shape)
+
+		f['d'] = d0 + (d1-d0)*f['fraction']
+		f['ot'] = ot0 + (ot1-ot0)*f['fraction']
+		f['z'] = z0 + (z1-z0)*f['fraction']
+	
+	d = np.zeros((filelist[0]['d'].shape[0], len(filelist)*filelist[0]['d'].shape[1]))
+	ot = np.zeros((filelist[0]['d'].shape[0], len(filelist)*filelist[0]['d'].shape[1]))
+	z = np.zeros((filelist[0]['d'].shape[0], len(filelist)*filelist[0]['d'].shape[1]))
+
+	for i in range(len(filelist)):
+		d[:,i] = filelist[i]['d'].T
+		ot[:,i] = filelist[i]['ot'].T
+		z[:,i] = filelist[i]['z'].T
+	return (d,ot,z)
+
+def extract_from_two_datetimes(x,y,dt0,dt1,varname='salt',interval=3600,**kwargs):
+	t0 = time.mktime(dt0.timetuple())
+	t1 = time.mktime(dt1.timetuple())
+	interval = float(interval)
+
+	time_stamps = interval*np.arange(t0/interval,(t1/interval)+1)
+
+	date_times = []
+	for ts in time_stamps:
+		date_times.append(dt.datetime.fromtimestamp(ts))
+#	for d in date_times:
+#		print(d.isoformat())
+	print(dt0.isoformat(),date_times[0].isoformat())
+	print(dt1.isoformat(),date_times[-1].isoformat())
+	return extract_from_datetime_list(date_times,x,y,varname=varname,**kwargs)
