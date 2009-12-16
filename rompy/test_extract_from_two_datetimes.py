@@ -33,4 +33,4 @@ d,t,z = extract_from_series.extract_from_two_datetimes(x,y,dt0,dt1,varname=varna
 #print(t)
 #print('data')
 #print(d)
-plot_time_series_profile(t,-z,d,clim=clim_map[varname],varname=varname,filename='/Users/lederer/tmp/rompy.arbitrary_time_series_profile.png')
+plot_time_series_profile(t,z,d,clim=clim_map[varname],varname=varname,filename='/Users/lederer/tmp/rompy.arbitrary_time_series_profile.png')

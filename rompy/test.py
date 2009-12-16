@@ -18,6 +18,7 @@ map7 = False
 map8 = False
 map9 = False
 map10 = False
+map11 = False
 
 # map1 = True
 # map2 = True
@@ -25,10 +26,11 @@ map10 = False
 # map4 = True
 # map5 = True
 # map6 = True
-map7 = True
-map8 = True
-map9 = True
-map10 = True
+# map7 = True
+# map8 = True
+# map9 = True
+# map10 = True
+map11 = True
 
 if map1:
 	print('map1')
@@ -194,3 +196,13 @@ if map10: # velocity in Main Basin
 	data = np.ma.array(data, mask=np.abs(data) > 100)
 	
 	plot_utils.plot_mickett(coords=coords,data=data,varname='U', region=' Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_U.png', n=n, clim=[-2,2], x_axis_offset=utils.offset_region(coords),cmap='red_blue')
+	
+if map11:
+	print('map11')
+	n = 5
+	x,y = utils.high_res_hood_canal_xy(n=n)
+#	x,y = utils.high_res_main_basin_xy(n=n)
+	
+	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='salt', extraction_type='profile', x=x, y=y)
+	
+	plot_utils.plot_parker(coords=coords, data=data, varname='Salinity', region='Hood Canal', filename='/Users/lederer/tmp/rompy.parker_hood_salt.png', n=n,  x_axis_offset=utils.offset_region(coords), clim=[0,20,32,32], cmap='banas_hsv_cm')

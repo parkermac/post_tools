@@ -27,13 +27,13 @@ def map_varname(v):
 def red_blue_cm():
 	cdict = {'red':		[(0.0, 0.0, 0.0),
 						(0.5,1.0,1.0),
-						(1.0, 1.0, 1.0)],
+						(1.0, 0.83, 0.83)],
 			
-			'green':	[(0.0, 0.0, 0.0),
+			'green':	[(0.0, 0.34, 0.34),
 						(0.5, 1.0, 1.0),
 						(1.0, 0.0, 0.0)],
 			
-			'blue':		[(0.0, 1.0, 1.0),
+			'blue':		[(0.0, 0.75, 0.75),
 						(0.5, 1.0, 1.0),
 						(1.0, 0.0, 0.0)]
 			}
@@ -198,11 +198,14 @@ def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	ax.grid()
 	FigureCanvas(fig).print_png(filename)
 
-def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='i',clim=None):
+def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='i',clim=None,cmap='banas_hsv_cm'):
 	fig = Figure(facecolor='white',figsize=(12.0,12.0))
 #	ax = fig.add_subplot(111)
 	longest_side_size = 24.0
 	#ax = fig.add_axes((0.,0.,1.,1.),axisbg='grey')
+	
+	cmap,sm,norm = make_cmap_sm_norm(d=data,clim=clim,cmap=cmap)
+	
 	ax = fig.add_axes((0.,0.,0.85,1.),axisbg='grey')
 	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
 	lllat = np.min(lat)
@@ -236,20 +239,20 @@ def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution
 # 	print(bbox.xmin, bbox.xmax, bbox.ymin, bbox.ymax)
 # 	
 # 	
-	if clim==None:
-		cmap = banas_hsv_cm(np.min(data[:]),np.min(data[:]),np.max(data[:]),np.max(data[:]))
-		norm = Normalize(vmin=np.min(data[:]),vmax=np.max(data[:]),clip=False)
-	elif len(clim) == 2:
-		cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1],N=20)
-		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
-	elif len(clim) == 4:
-		cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
-		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
+# 	if clim==None:
+# 		cmap = banas_hsv_cm(np.min(data[:]),np.min(data[:]),np.max(data[:]),np.max(data[:]))
+# 		norm = Normalize(vmin=np.min(data[:]),vmax=np.max(data[:]),clip=False)
+# 	elif len(clim) == 2:
+# 		cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1],N=20)
+# 		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
+# 	elif len(clim) == 4:
+# 		cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
+#		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
 		
 	pcm = m.pcolormesh(x,y,data,cmap=cmap,norm=norm)
 	m.drawcoastlines(linewidth=0.5)
 	
-	my_colorbar = fig.colorbar(pcm,cax=cax)
+	my_colorbar = fig.colorbar(sm,cax=cax)
 	
 	FigureCanvas(fig).print_png(filename)
 
@@ -319,9 +322,14 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 		my_plot23 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,solid_contours,colors='k',linewidths=0.5)
 		ax2.clabel(my_plot23,inline=True,fmt=contour_label_fmt,fontsize=fontsize)
 #		ax2.set_xlim = ax2_xlim
+#	print(ax2.get_ylim())
+#	ax2.fill_between(x_axis_as_km,coords['zm'][0,:],ax2.get_ylim()[0],color='grey')
+	ax2.fill_between(x_axis_as_km,coords['zm'][0,:],-1000.0,color='grey')
+#	ax2.set_ylim(ax2.get_ylim()[0],2)
+#	print(ax2.get_ylim())
+	ax2.set_ylim((np.min(coords['zm'][:])-20.0),2)
+#	print(ax2.get_ylim())
 	
-	ax2.fill_between(x_axis_as_km,coords['zm'][0,:],ax2.get_ylim()[0],color='grey')
-#	ax2.set_ylim(ax2.get_ylim()[0],-20)
 	ax2.set_xlim((0,x_axis_as_km[-1]))
 	for yticklabel in ax2.get_yticklabels():
 		yticklabel.set_fontsize(fontsize)
@@ -406,4 +414,114 @@ def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_serie
 		label.set_rotation(30)
 	
 	ax1.set_title('%s Over Time at a Point'% map_varname(varname))
+	FigureCanvas(fig).print_png(filename)
+	
+def plot_parker(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='h',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None):
+	fig = Figure(facecolor='white',figsize=(12.0,9.0))
+	fontsize = 8
+	
+	cmap,sm,norm =  make_cmap_sm_norm(d=data,clim=clim,cmap=cmap)
+	
+	ax1 = fig.add_axes([0.1, 0.55, 0.65, 0.4]) # top 20 meters
+	ax2 = fig.add_axes([0.1, 0.1, 0.65, 0.4]) # full column
+	ax3 = fig.add_axes([0.7, 0.55, 0.3, 0.4],axis_bgcolor='white')#'#298FAF') # map of domain containing curtain
+	cax = fig.add_axes([0.84, 0.1, 0.02, 0.4],frameon=False) # subplot for the color axis
+	
+	x_axis_as_km = utils.coords_to_km(coords)
+	station_locations = x_axis_as_km[0:-1:n]
+
+	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
+	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
+	
+	if labeled_contour_gap is not None:
+		if int(labeled_contour_gap) == labeled_contour_gap:
+			contour_label_fmt = '%d'
+		else:
+			contour_label_fmt = '%1.2f'
+		
+		solid_contours = np.arange(clim[0],clim[-1],labeled_contour_gap)
+
+		my_plot13 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,solid_contours,colors='k',linewidths=0.5)
+		ax1.clabel(my_plot13,inline=True,fmt=contour_label_fmt,fontsize=fontsize)
+
+
+	my_plot14 = ax1.plot(station_locations, 1.5*np.ones(len(station_locations)),'v',color='grey')
+	
+	ax1.fill_between(x_axis_as_km,coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
+
+	ax1.set_ylim((-20,2))
+	ax1.set_xlim((0,x_axis_as_km[-1]))
+	for yticklabel in ax1.get_yticklabels():
+		yticklabel.set_fontsize(fontsize)
+	
+	
+	
+	my_plot21 = ax2.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
+	my_plot22 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
+
+	if labeled_contour_gap is not None:
+		my_plot23 = ax2.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,solid_contours,colors='k',linewidths=0.5)
+		ax2.clabel(my_plot23,inline=True,fmt=contour_label_fmt,fontsize=fontsize)
+
+	ax2.fill_between(x_axis_as_km,coords['zm'][0,:],-1000.0,color='grey')
+	ax2.set_ylim((np.min(coords['zm'][:])-20.0),2)
+	
+	ax2.set_xlim((0,x_axis_as_km[-1]))
+	for yticklabel in ax2.get_yticklabels():
+		yticklabel.set_fontsize(fontsize)
+	
+	my_colorbar = fig.colorbar(sm,cax=cax)
+	if labeled_contour_gap is not None:
+		my_colorbar.add_lines(my_plot23)
+	
+	ax1.set_title('%s %s from a ROMS run' % (region,varname))
+	ax1.set_ylabel('depth in meters',position=(0.05,0))
+	ax1.set_xticks(station_locations)
+	ax1.set_xticklabels('')
+	
+	if x_axis_style == 'kilometers' or x_axis_style == 'kilometer':
+			td = 10 #tick_distance
+			
+			ax2.set_xticks(td*np.arange(x_axis_as_km[-1]/td) + (x_axis_offset % td))
+			ax2.set_xticklabels([int(num) for num in np.arange(-int(x_axis_offset - x_axis_offset % td),x_axis_as_km[-1],td)])
+			for xticklabel in ax2.get_xticklabels():
+				xticklabel.set_fontsize(fontsize)
+			ax2.set_xlabel('Kilometers')
+
+	elif x_axis_style == 'stations' or x_axis_style == 'station':
+		if region == 'Hood Canal':
+			tick_list = x_axis_as_km[::n]
+			ax2.set_xticks(tick_list)
+			ax2.set_xticklabels(utils.hood_canal_station_list(),size=fontsize)
+			ax2.set_xlabel('Station ID')
+			
+		elif region == 'Main Basin':
+			tick_list = x_axis_as_km[::n]
+			ax2.set_xticks(tick_list)
+			ax2.set_xticklabels(utils.main_basin_station_list(),size=fontsize)
+	 		ax2.set_xlabel('Station ID') 			
+ 	else:
+ 		ax2.set_xticks(x_axis_as_km)
+ 		ax2.set_xticklabels('')
+		ax2.set_xlabel('Kilometers')
+	
+	# make map in the top right corner
+	# these lat lon values are derived from the curtain defined for the plot
+	lllat = np.min(coords['ym'])
+	urlat = np.max(coords['ym'])
+	lllon = np.min(coords['xm'])
+	urlon = np.max(coords['xm'])
+
+	lllat = 47.0
+	urlat = 48.5
+	lllon = -123.3
+	urlon = -122.2
+	
+	
+	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax3)
+	x,y = m(*(coords['xm'],coords['ym']))
+#	pcm = m.plot(x,y,'r')
+	m.drawcoastlines(linewidth=0.5)
+	m.fillcontinents(color='#ECECEC')
+	pcm = m.plot(x,y,'r',linewidth=0.5)
 	FigureCanvas(fig).print_png(filename)
