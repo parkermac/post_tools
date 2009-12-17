@@ -25,7 +25,7 @@ filelist = glob.glob('ocean_his*.nc')
 #x,y = utils.station_to_lat_lon([20])
 x = [-122.3904]
 y = [47.6108]
-varname='temp'
+varname='salt'
 clim_map = {
 	'temp':[0,8,20,20],
 	'salt':[0,21,33,33],

@@ -172,6 +172,21 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 		elif (extraction_type == 'profile' or extraction_type == 'profiles') \
 							and kwargs.has_key('x') and kwargs.has_key('y'):
 			
+			if dims[1] == 's_rho':
+				K = K + 2
+				cs_list = [-1.0]
+				tmp = grid['cs'][:]
+				for t in tmp:
+					cs_list.append(t)
+				cs_list.append(0.0)
+				cs = np.array(cs_list)
+			elif dims[1] == 's_w':
+				cs = grid['csw'][:]
+			elif K==1:
+				cs = 0
+			else:
+				raise TypeError('Unable to determine which cs to use. dim[1] = %s' % dim[1])
+			
 			x3 = np.tile(x2.reshape(1, J, I),(K,1,1))
 			y3 = np.tile(y2.reshape(1, J, I),(K,1,1))
 			mask3 = np.tile(mask2.reshape(1, J, I),(K,1,1))
@@ -199,8 +214,14 @@ def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 				zetai[i] = utils.interp_2d(x=lon,y=lat,data=np.squeeze(ncf.variables['zeta'][:]),yi=y[i],xi=x[i])
 				Hi[i] = utils.interp_2d(x=lon,y=lat,data=np.squeeze(grid['H'][:]),yi=y[i],xi=x[i])
 			z = zetai + zi*(zetai + Hi)
-
-			data = utils.interp_3d(x=x3,y=y3,z=cs3,data=np.squeeze(ncvar[:]),xi=xi,yi=yi,zi=zi)
+			
+			if dims[1] == 's_rho':
+				rd = np.squeeze(ncvar[:])
+				rd = np.concatenate((rd[0:1,:,:],rd,rd[-1:,:,:]))
+			elif dims[1] == 's_w':
+				rd = np.squeeze(ncvar[:])
+			
+			data = utils.interp_3d(x=x3,y=y3,z=cs3,data=rd,xi=xi,yi=yi,zi=zi)
 #			data = np.ma.array(data,mask=(data>100))
 			data = np.ma.array(data,mask=(z>100))
 #			data[data>100] = 0.

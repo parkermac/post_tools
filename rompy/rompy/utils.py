@@ -148,7 +148,11 @@ def interp_3d_point(x,y,z,d,xi,yi,zi):
 	w0 = i0*(1-yd) + i1*yd
 	w1 = j0*(1-yd) + j1*yd
 	
-	return w0*(1-xd) + w1*xd
+	# cludge alert
+	if np.abs(w0) > 1.0e35 or np.abs(w1) > 1.0e35:
+		return np.nan
+	else:
+		return w0*(1-xd) + w1*xd
 
 def interp_3d_from_list_of_points(x,y,z,d,p_list):
 	di = np.zeros(len(p_list),1)

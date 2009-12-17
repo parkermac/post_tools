@@ -28,13 +28,13 @@ map11 = False
 # map6 = True
 # map7 = True
 # map8 = True
-# map9 = True
+map9 = True
 # map10 = True
-map11 = True
+# map11 = True
 
 if map1:
 	print('map1')
-	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='zeta')
+	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='zeta')
 	plot_utils.plot_surface(coords['xm'],coords['ym'],data)
 	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename='/Users/lederer/tmp/rompy.map.png')
 	
@@ -54,13 +54,13 @@ if map2:
 	# hood canal
 	x = np.linspace(-123.25,-122.5,400)
 	y = np.linspace(47.33,48.0,400)
-	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='zeta',extraction_type='points', x=x, y=y)
+	(data, coords) = rompy.extract('ocean_his_0001.nc', varname='zeta',extraction_type='points', x=x, y=y)
 	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename='/Users/lederer/tmp/rompy.map2.png',resolution='h')
 #	plot_utils.plot_surface(coords['xm'],coords['ym'],data,filename='/Users/lederer/tmp/rompy.map2.png')
 
 if map3:
 	print('map3')
-	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='v',extraction_type='full')
+	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='v',extraction_type='full')
 	print(data.shape)
 	for key in coords:
 		print(key, coords[key].shape)
@@ -69,7 +69,7 @@ if map3:
 
 if map4:
 	print('map4')
-	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='salt',extraction_type='surface')
+	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='salt',extraction_type='surface')
 	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename='/Users/lederer/tmp/rompy.map4.png',resolution='h')
 	
 if map5:
@@ -82,7 +82,7 @@ if map5:
 	x,y = utils.hood_canal_xy()
 	
 	#cs = np.linspace(-0.96103753,-0.00143376,10)
-	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='salt',extraction_type='profile',x=x,y=y)#,cs=cs)
+	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='salt',extraction_type='profile',x=x,y=y)#,cs=cs)
 	fig = Figure(facecolor='white')
 	ax = fig.add_subplot(111)
 	
@@ -109,7 +109,7 @@ if map6:
 	x,y = utils.main_basin_xy()
 	
 	#cs = np.linspace(-0.96103753,-0.00143376,10)
-	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='salt',extraction_type='profile',x=x,y=y)#,cs=cs)
+	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='salt',extraction_type='profile',x=x,y=y)#,cs=cs)
 	fig = Figure(facecolor='white')
 	ax = fig.add_subplot(111)
 	
@@ -132,12 +132,12 @@ if map7: # Main Basin
 	x,y = utils.high_res_main_basin_xy(n=n)
 	
 	# Salinity
-	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='salt', extraction_type='profile', x=x, y=y)
+	(data, coords) = rompy.extract('ocean_his_0001.nc', varname='salt', extraction_type='profile', x=x, y=y)
 	
 	plot_utils.plot_mickett(coords=coords, data=data, varname='Salinity', region='Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_salt.png', n=n, x_axis_offset=utils.offset_region(coords), clim=[0,20,32,32], cmap='banas_hsv_cm', labeled_contour_gap=2)
 	
 	# Temperature
-	(data, coords) = rompy.extract('ocean_his_1000.nc',varname='temp',extraction_type='profile',x=x,y=y)
+	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='temp',extraction_type='profile',x=x,y=y)
 	
 	plot_utils.plot_mickett(coords=coords, data=data, varname='Temperature', region='Main Basin', filename='/Users/lederer/tmp/rompy.mickett_main_temp.png', n=n,  x_axis_offset=utils.offset_region(coords), clim=[0,20], cmap='banas_hsv_cm', labeled_contour_gap=2)
 
@@ -146,12 +146,12 @@ if map8: # Hood Canal
 	n=10
 	x,y = utils.high_res_hood_canal_xy(n=n)
 	# Salinity
-	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='salt', extraction_type='profile', x=x, y=y)
+	(data, coords) = rompy.extract('ocean_his_0001.nc', varname='salt', extraction_type='profile', x=x, y=y)
 	
 	plot_utils.plot_mickett(coords=coords, data=data, varname='Salinity', region='Hood Canal', filename='/Users/lederer/tmp/rompy.mickett_hood_salt.png', n=n,  x_axis_offset=utils.offset_region(coords), clim=[0,20,32,32], cmap='banas_hsv_cm')
 	
 	# Temperature
-	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='temp', extraction_type='profile', x=x, y=y)
+	(data, coords) = rompy.extract('ocean_his_0001.nc', varname='temp', extraction_type='profile', x=x, y=y)
 	
 	plot_utils.plot_mickett(coords=coords, data=data, varname='Temperature', region='Hood Canal', filename='/Users/lederer/tmp/rompy.mickett_hood_temp.png', n=n, x_axis_offset=utils.offset_region(coords), clim=[0,20], cmap='banas_hsv_cm')
 
@@ -159,8 +159,8 @@ if map9: # velocity in Hood Canal
 	print('map9')
 	n=20
 	x,y = utils.high_res_hood_canal_xy(n=n)
-	(u, coords) = rompy.extract('ocean_his_1000.nc',varname='u',extraction_type='profile',x=x,y=y)
-	(v, coords) = rompy.extract('ocean_his_1000.nc',varname='v',extraction_type='profile',x=x,y=y)
+	(u, coords) = rompy.extract('ocean_his_0001.nc',varname='u',extraction_type='profile',x=x,y=y)
+	(v, coords) = rompy.extract('ocean_his_0001.nc',varname='v',extraction_type='profile',x=x,y=y)
 	data = np.zeros(u.shape)
 
 	for i in range(u.shape[1]):
@@ -180,8 +180,8 @@ if map10: # velocity in Main Basin
 	print('map10')
 	n=3
 	x,y = utils.high_res_main_basin_xy(n=n)
-	(u, coords) = rompy.extract('ocean_his_1000.nc',varname='u',extraction_type='profile',x=x,y=y)
-	(v, coords) = rompy.extract('ocean_his_1000.nc',varname='v',extraction_type='profile',x=x,y=y)
+	(u, coords) = rompy.extract('ocean_his_0001.nc',varname='u',extraction_type='profile',x=x,y=y)
+	(v, coords) = rompy.extract('ocean_his_0001.nc',varname='v',extraction_type='profile',x=x,y=y)
 	data = np.zeros(u.shape)
 
 	for i in range(u.shape[1]):
@@ -203,6 +203,6 @@ if map11:
 	x,y = utils.high_res_hood_canal_xy(n=n)
 #	x,y = utils.high_res_main_basin_xy(n=n)
 	
-	(data, coords) = rompy.extract('ocean_his_1000.nc', varname='salt', extraction_type='profile', x=x, y=y)
+	(data, coords) = rompy.extract('ocean_his_0001.nc', varname='salt', extraction_type='profile', x=x, y=y)
 	
 	plot_utils.plot_parker(coords=coords, data=data, varname='Salinity', region='Hood Canal', filename='/Users/lederer/tmp/rompy.parker_hood_salt.png', n=n,  x_axis_offset=utils.offset_region(coords), clim=[0,20,32,32], cmap='banas_hsv_cm')
