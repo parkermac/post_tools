@@ -175,7 +175,7 @@ def make_cmap_sm_norm(d=None,clim=None,cmap=None):
 		if clim==None:
 			cmap = banas_hsv_cm(np.min(d[:]),np.min(d[:]),np.max(d[:]),np.max(d[:]))
 		elif len(clim) == 2:
-			cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1],N=20)
+			cmap = banas_hsv_cm(clim[0],clim[0],clim[1],clim[1])
 		elif len(clim) == 4:
 			cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
 	
@@ -198,23 +198,33 @@ def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	ax.grid()
 	FigureCanvas(fig).print_png(filename)
 
-def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='i',clim=None,cmap='banas_hsv_cm'):
-	fig = Figure(facecolor='white',figsize=(12.0,12.0))
+def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='h',clim=None,cmap='banas_hsv_cm',title=None):
+	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 #	ax = fig.add_subplot(111)
 	longest_side_size = 24.0
 	#ax = fig.add_axes((0.,0.,1.,1.),axisbg='grey')
 	
 	cmap,sm,norm = make_cmap_sm_norm(d=data,clim=clim,cmap=cmap)
 	
-	ax = fig.add_axes((0.,0.,0.85,1.),axisbg='grey')
+	ax1 = fig.add_axes((0.1,0.1,0.4,0.8),axisbg='grey')
+	ax2 = fig.add_axes((0.5,0.1,0.4,0.8),axisbg='grey')
 	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
 	lllat = np.min(lat)
 	urlat = np.max(lat)
 	lllon = np.min(lon)
 	urlon = np.max(lon)
+	
+	# puget sound bounding box
+	psbb_lllat = 47.0
+	psbb_urlat = 48.5
+	psbb_lllon = -123.2
+	psbb_urlon = -122.1
+	
 #	print(lllat,urlat,lllon,urlon)
-	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax)
-	x,y = m(*(lon,lat))
+	m1 = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax1)
+	m2 = Basemap(projection='merc',llcrnrlat=psbb_lllat,urcrnrlat=psbb_urlat,llcrnrlon=psbb_lllon,urcrnrlon=psbb_urlon,resolution='f',ax=ax2)
+	x1,y1 = m1(*(lon,lat))
+	x2,y2 = m2(*(lon,lat))
 
 # Code to make the map fit snuggly with the png
 #print(np.max(x), np.min(x), np.max(y),np.min(y))
@@ -249,10 +259,16 @@ def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution
 # 		cmap = banas_hsv_cm(clim[0],clim[1],clim[2],clim[3])
 #		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
 		
-	pcm = m.pcolormesh(x,y,data,cmap=cmap,norm=norm)
-	m.drawcoastlines(linewidth=0.5)
+	pcm1 = m1.pcolormesh(x1,y1,data,cmap=cmap,norm=norm)
+	m1.drawcoastlines(linewidth=0.5)
+	
+	pcm2 = m2.pcolormesh(x2,y2,data,cmap=cmap,norm=norm)
+	m2.drawcoastlines(linewidth=0.5)
 	
 	my_colorbar = fig.colorbar(sm,cax=cax)
+	
+	if not title == None:
+		ax1.set_title(title)
 	
 	FigureCanvas(fig).print_png(filename)
 
@@ -416,7 +432,7 @@ def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_serie
 	ax1.set_title('%s Over Time at a Point'% map_varname(varname))
 	FigureCanvas(fig).print_png(filename)
 	
-def plot_parker(coords,data,varname='',region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='h',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None):
+def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='i',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None):
 	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 	fontsize = 8
 	
@@ -474,7 +490,11 @@ def plot_parker(coords,data,varname='',region='',filename='/Users/lederer/tmp/ro
 	if labeled_contour_gap is not None:
 		my_colorbar.add_lines(my_plot23)
 	
-	ax1.set_title('%s %s from a ROMS run' % (region,varname))
+	if title==None:
+		ax1.set_title('%s %s from a ROMS run' % (region,varname))
+	else:
+		ax1.set_title(title)
+	
 	ax1.set_ylabel('depth in meters',position=(0.05,0))
 	ax1.set_xticks(station_locations)
 	ax1.set_xticklabels('')
@@ -482,8 +502,14 @@ def plot_parker(coords,data,varname='',region='',filename='/Users/lederer/tmp/ro
 	if x_axis_style == 'kilometers' or x_axis_style == 'kilometer':
 			td = 10 #tick_distance
 			
-			ax2.set_xticks(td*np.arange(x_axis_as_km[-1]/td) + (x_axis_offset % td))
-			ax2.set_xticklabels([int(num) for num in np.arange(-int(x_axis_offset - x_axis_offset % td),x_axis_as_km[-1],td)])
+			left_most_tick_label = -x_axis_offset + (x_axis_offset % td)
+			left_most_tick = left_most_tick_label + x_axis_offset
+						
+			ax2.set_xticks(np.arange(left_most_tick,x_axis_as_km[-1],td))
+			ax2.set_xticklabels([int(num) for num in np.arange(left_most_tick_label, x_axis_as_km[-1],td)])
+			
+#			ax2.set_xticks(td*np.arange(x_axis_as_km[-1]/td) + (x_axis_offset % td))
+#			ax2.set_xticklabels([int(num) for num in np.arange(-int(x_axis_offset - x_axis_offset % td),x_axis_as_km[-1],td)])
 			for xticklabel in ax2.get_xticklabels():
 				xticklabel.set_fontsize(fontsize)
 			ax2.set_xlabel('Kilometers')
@@ -507,11 +533,12 @@ def plot_parker(coords,data,varname='',region='',filename='/Users/lederer/tmp/ro
 	
 	# make map in the top right corner
 	# these lat lon values are derived from the curtain defined for the plot
-	lllat = np.min(coords['ym'])
-	urlat = np.max(coords['ym'])
-	lllon = np.min(coords['xm'])
-	urlon = np.max(coords['xm'])
-
+#	lllat = np.min(coords['ym'])
+#	urlat = np.max(coords['ym'])
+#	lllon = np.min(coords['xm'])
+#	urlon = np.max(coords['xm'])
+	
+#	lat lon values for the inset map show a close-up of the Puget Sound
 	lllat = 47.0
 	urlat = 48.5
 	lllon = -123.3
@@ -523,5 +550,7 @@ def plot_parker(coords,data,varname='',region='',filename='/Users/lederer/tmp/ro
 #	pcm = m.plot(x,y,'r')
 	m.drawcoastlines(linewidth=0.5)
 	m.fillcontinents(color='#ECECEC')
-	pcm = m.plot(x,y,'r',linewidth=0.5)
+	pcm1 = m.plot(x,y,'r',linewidth=0.5)
+	pcm2 = m.plot(x[0:-1:n],y[0:-1:n],'.k')
+	
 	FigureCanvas(fig).print_png(filename)

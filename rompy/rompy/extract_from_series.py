@@ -7,76 +7,77 @@ import pytz
 import netCDF4 as nc
 import numpy as np
 
+import extract_utils
 import extract_from_file
 
-def file_time(f):
-	UTC = pytz.timezone('UTC')
-	ncf = nc.Dataset(f,mode='r')
-	ot = ncf.variables['ocean_time']
-	base_time = dt.datetime.strptime(ot.units,'seconds since %Y-%m-%d %H:%M:%S').replace(tzinfo=UTC)
-	offset = dt.timedelta(seconds=ot[0][0])
-	ncf.close()
-	return base_time + offset
-
-def file_timestamp(f):
-	t = file_time(f)
-	return time.mktime(t.timetuple())
-
-def calc_num_time_slices(file1,file2,td):
-	d1 = file_time(file1)
-	d2 = file_time(file2)
-	
-	gap = d2-d1
-	gap_seconds = gap.days*60*60*24 + gap.seconds
-	td_seconds = td.days*60*60*24 + td.seconds
-	
-	t1 = time.mktime(d1.timetuple())
-	t2 = time.mktime(d2.timetuple())
-	tgap = t2 - t1
-	
-	print(gap_seconds, tgap)
-	
-	return int(gap_seconds/td_seconds + 1)
-
-def filelist_from_datelist(datelist, basedir='/Users/lederer/Repositories/PSVS/rompy/', basename='ocean_his_*.nc'):
-	files = glob.glob(os.path.join(basedir,basename))
-	files.sort()
-	
-	master_file_list = []
-	master_timestamp_list = []
-	master_datetime_list = []
-	timelist = []
-	returnlist = []
-	
-	for file in files:
-		master_file_list.append(file)
-		master_timestamp_list.append(file_timestamp(file))
-		master_datetime_list.append(file_time(file))
-	
-	tsarray = np.array(master_timestamp_list)
-
-	for d in datelist:
-		try:
-			t = time.mktime(d.timetuple())
-			timelist.append(t)
-			tl = np.nonzero(tsarray <= t)[0][-1]
-			th = np.nonzero(t <= tsarray)[0][0]
-			if not tl == th:
-				fraction = (t-tsarray[th])/(tsarray[tl]-tsarray[th])
-			else:
-				fraction = 0.0
-			
-			returnlist.append({
-							'file0': master_file_list[tl],
-							'file1': master_file_list[th],
-							'fraction': fraction,
-							'timestamp':t,
-							'datetime':d
-							})
-		except IndexError, e:
-			print('Index out of bounds for %s' % (d.isoformat()))
-			
-	return returnlist
+# def file_time(f):
+# 	UTC = pytz.timezone('UTC')
+# 	ncf = nc.Dataset(f,mode='r')
+# 	ot = ncf.variables['ocean_time']
+# 	base_time = dt.datetime.strptime(ot.units,'seconds since %Y-%m-%d %H:%M:%S').replace(tzinfo=UTC)
+# 	offset = dt.timedelta(seconds=ot[0][0])
+# 	ncf.close()
+# 	return base_time + offset
+# 
+# def file_timestamp(f):
+# 	t = file_time(f)
+# 	return time.mktime(t.timetuple())
+# 
+# def calc_num_time_slices(file1,file2,td):
+# 	d1 = file_time(file1)
+# 	d2 = file_time(file2)
+# 	
+# 	gap = d2-d1
+# 	gap_seconds = gap.days*60*60*24 + gap.seconds
+# 	td_seconds = td.days*60*60*24 + td.seconds
+# 	
+# 	t1 = time.mktime(d1.timetuple())
+# 	t2 = time.mktime(d2.timetuple())
+# 	tgap = t2 - t1
+# 	
+# 	print(gap_seconds, tgap)
+# 	
+# 	return int(gap_seconds/td_seconds + 1)
+# 
+# def filelist_from_datelist(datelist, basedir='/Users/lederer/Repositories/PSVS/rompy/', basename='ocean_his_*.nc'):
+# 	files = glob.glob(os.path.join(basedir,basename))
+# 	files.sort()
+# 	
+# 	master_file_list = []
+# 	master_timestamp_list = []
+# 	master_datetime_list = []
+# 	timelist = []
+# 	returnlist = []
+# 	
+# 	for file in files:
+# 		master_file_list.append(file)
+# 		master_timestamp_list.append(file_timestamp(file))
+# 		master_datetime_list.append(file_time(file))
+# 	
+# 	tsarray = np.array(master_timestamp_list)
+# 
+# 	for d in datelist:
+# 		try:
+# 			t = time.mktime(d.timetuple())
+# 			timelist.append(t)
+# 			tl = np.nonzero(tsarray <= t)[0][-1]
+# 			th = np.nonzero(t <= tsarray)[0][0]
+# 			if not tl == th:
+# 				fraction = (t-tsarray[th])/(tsarray[tl]-tsarray[th])
+# 			else:
+# 				fraction = 0.0
+# 			
+# 			returnlist.append({
+# 							'file0': master_file_list[tl],
+# 							'file1': master_file_list[th],
+# 							'fraction': fraction,
+# 							'timestamp':t,
+# 							'datetime':d
+# 							})
+# 		except IndexError, e:
+# 			print('Index out of bounds for %s' % (d.isoformat()))
+# 			
+# 	return returnlist
 
 def extract_from_series(file_list,extraction_type='point',varname='zeta',**kwargs):
 	UTC = pytz.timezone('UTC')
@@ -97,12 +98,12 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',**kwarg
 		
 		f1 = file_list[0]
 		f2 = file_list[1]
-		time_list = [file_time(file_list[0])]
+		time_list = [extract_utils.file_time(file_list[0])]
 		
 		for i in range(1,len(file_list)):
 			for j in range(len(x)):
 				data[i,j],junk = extract_from_file.extract_from_file(file_list[i],varname=varname,extraction_type='point',x=x[j],y=y[j])
-			time_list.append(file_time(file_list[i]))
+			time_list.append(extract_utils.file_time(file_list[i]))
 		return (data,time_list)
 		
 #		for i in range(1,ntimes):
@@ -154,7 +155,7 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',**kwarg
 #				ocean_time = np.zeros(data.shape)
 			if ocean_time == None:
 				ocean_time = np.zeros(data.shape)
-			ot = file_timestamp(file_list[i])
+			ot = extract_utils.file_timestamp(file_list[i])
 #			ot = file_time(file)
 			for j in range(data.shape[0]):
 				ocean_time[j,i] = ot
@@ -162,7 +163,7 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',**kwarg
 	return
 
 def extract_from_datetime_list(datelist,x,y,varname='salt',**kwargs):
-	filelist = filelist_from_datelist(datelist)
+	filelist = extract_utils.filelist_from_datelist(datelist)
 	for f in filelist:
 		(d0,ot0,z0) = extract_from_series([f['file0']],x=x,y=y,varname=varname,extraction_type='profile',**kwargs)
 		(d1,ot1,z1) = extract_from_series([f['file1']],x=x,y=y,varname=varname,extraction_type='profile',**kwargs)

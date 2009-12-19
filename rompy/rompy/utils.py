@@ -334,8 +334,11 @@ def station_to_lat_lon(station_list):
 	lat_dict[4] = 48.2425
 	lon_dict[4] = -122.542
 	
-	lat_dict[6] = 47.925
-	lon_dict[6] = -122.4685
+#	lat_dict[6] = 47.925
+#	lon_dict[6] = -122.4685
+	
+	lat_dict[6] = 47.9298
+	lon_dict[6] = -122.4932
 	
 	lat_dict[7] = 47.9835
 	lon_dict[7] = -122.6201
@@ -355,11 +358,17 @@ def station_to_lat_lon(station_list):
 	lat_dict[10] = 47.8001
 	lon_dict[10] = -122.7198
 
-	lat_dict[11] = 47.3712
-	lon_dict[11] = -123.1329
-
-	lat_dict[12] = 47.4253
-	lon_dict[12] = -123.1083
+	lat_dict[11] = 47.3751
+	lon_dict[11] = -123.1375
+	
+	lat_dict[11.1] = 47.36176418802982
+	lon_dict[11.1] = -123.063768617271
+	
+	lat_dict[11.2] = 47.3550
+	lon_dict[11.2] = -123.0305
+	
+	lat_dict[12] = 47.4272
+	lon_dict[12] = -123.1142
 
 	lat_dict[13] = 47.5471
 	lon_dict[13] = -123.008
@@ -399,9 +408,12 @@ def station_to_lat_lon(station_list):
 	lat_dict[24] = 48.3416
 	lon_dict[24] = -123.1249
 
-	lat_dict[27] = 47.8133
-	lon_dict[27] = -122.455
-
+#	lat_dict[27] = 47.8133
+#	lon_dict[27] = -122.4050
+	
+	lat_dict[27] = 47.7403
+	lon_dict[27] = -122.4103
+	
 	lat_dict[28] = 47.7034
 	lon_dict[28] = -122.4544
 
@@ -411,8 +423,11 @@ def station_to_lat_lon(station_list):
 	lat_dict[30] = 47.4565
 	lon_dict[30] = -122.4084
 
-	lat_dict[31] = 47.3937
-	lon_dict[31] = -122.3601
+#	lat_dict[31] = 47.3937
+#	lon_dict[31] = -122.3601
+
+	lat_dict[31] = 47.3811
+	lon_dict[31] = -122.3487
 
 	lat_dict[32] = 47.3329
 	lon_dict[32] = -122.4427
@@ -420,18 +435,51 @@ def station_to_lat_lon(station_list):
 	lat_dict[33] = 47.3198
 	lon_dict[33] = -122.5008
 	
-	lat_dict[34] = 47.2869
-	lon_dict[34] = -122.5391
+	lat_dict[33.5] = 47.3235
+	lon_dict[33.5] = -122.5621
+	
+	lat_dict[34] = 47.28636086132807
+	lon_dict[34] = -122.5372204355572
+	
+	lat_dict[34.5] = 47.19570992132258
+	lon_dict[34.5] = -122.6043449761104
+	
+	lat_dict[35] = 47.1755994508588
+	lon_dict[35] = -122.6519213323306
+	
+	lat_dict[35.5] = 47.1124942780185
+	lon_dict[35.5] = -122.6858130539733
+	
+	lat_dict[35.6] = 47.11563089257614
+	lon_dict[35.6] = -122.7313463437406
+	
+	lat_dict[36] = 47.20101267057353
+	lon_dict[36] = -122.825703220149
+	
+	lat_dict[36.1] = 47.1670
+	lon_dict[36.1] = -122.8573269666242
+	
+	lat_dict[36.2] = 47.14631182649271
+	lon_dict[36.2] = -122.9157302320745
+	
+	lat_dict[36.3] = 47.07516793450768
+	lon_dict[36.3] = -122.9127057495704
 	
 	lat_dict[401] = 47.49
 	lon_dict[401] = -123.0567
 
-	lat_dict[402] = 47.3567
-	lon_dict[402] = -123.0233
-
-	lat_dict[403] = 47.3983
-	lon_dict[403] = -122.9283
-
+	lat_dict[402] = 47.3635
+	lon_dict[402] = -123.0167366137608
+	
+	lat_dict[402.1] = 47.37605785194047
+	lon_dict[402.1] = -123.0013100422375
+	
+	lat_dict[403] = 47.40338787905921
+	lon_dict[403] = -122.9112721092632
+	
+	lat_dict[403.1] = 47.42062136686801
+	lon_dict[403.1] = -122.8790276962233
+	
 	lat_dict['admiralty inlet'] = 48.1734
 	lon_dict['admiralty inlet'] = -122.7557
 	
@@ -458,10 +506,13 @@ def high_res_station_to_lat_lon(station_list,n=5):
 	return np.array(hr_lon), np.array(hr_lat)
 
 def hood_canal_station_list():
-	return [24,22,21,20,19,18,7,7.5,8,8.5,9,10,17,16,15,14,13,401,12,11,402]
+#	return [24,22,21,20,19,18,7,7.5,8,8.5,9,10,17,16,15,14,13,401,12,11,402]
+	return [7.5,8,8.5,9,10,17,16,15,14,13,401,12,11,11.1,11.2,402,402.1,403,403.1]
+#	return [11,11.1,11.2,402,402.1,403,403.1] # This is a close up of the nasty bits at the end of Hood Canal that are difficult to get right
 
 def main_basin_station_list():
-	return [24,22,21,20,19,18,7,6,27,28,29,30,31,32,33]
+	return [24,22,21,20,19,18,7,6,27,28,29,30,31,32,33,33.5,34,34.5,35,35.5,35.6,36, 36.1, 36.2, 36.3]
+#	return [7,6,27,28,29,30,31,32,33,33.5,34]
 	
 def hood_canal_xy():
 	return station_to_lat_lon(hood_canal_station_list())

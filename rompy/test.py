@@ -20,7 +20,7 @@ map9 = False
 map10 = False
 map11 = False
 
-# map1 = True
+map1 = True
 # map2 = True
 # map3 = True
 # map4 = True
@@ -28,13 +28,13 @@ map11 = False
 # map6 = True
 # map7 = True
 # map8 = True
-map9 = True
+# map9 = True
 # map10 = True
 # map11 = True
 
 if map1:
 	print('map1')
-	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='zeta')
+	(data, coords) = rompy.extract('ocean_his_0001.nc',varname='h')
 	plot_utils.plot_surface(coords['xm'],coords['ym'],data)
 	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename='/Users/lederer/tmp/rompy.map.png')
 	
