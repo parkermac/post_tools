@@ -17,7 +17,7 @@ def surface_map(file,img_file=None,varname='salt',clim=None):
 	
 	
 	title = '%s %s %s %s' % ( extract_utils.run_id(file), file, var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt) )
-	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename=img_file, clim=clim, title=title, resolution=whole_domain_coastline_res)
+	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename=img_file, clim=clim, title=title, resolution=whole_domain_coastline_res, caxis_label=clabel_map[varname])
 
 def main_basin_curtain(file,img_file,varname,n=4,clim=None): # Main Basin
 	if var == 'U':
@@ -29,7 +29,7 @@ def main_basin_curtain(file,img_file,varname,n=4,clim=None): # Main Basin
 		
 		title = 'Main Basin %s %s' % (var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
 		
-		plot_utils.plot_parker(coords=coords, data=data, varname=varname, 	region='Main Basin', filename=img_file, n=n, x_axis_offset=utils.offset_region(coords), clim=clim,cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution)
+		plot_utils.plot_parker(coords=coords, data=data, varname=varname, 	region='Main Basin', filename=img_file, n=n, x_axis_offset=utils.offset_region(coords), clim=clim,cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname])
 	
 
 def hood_canal_curtain(file,img_file,varname,n=1,clim=None): # Hood Canal
@@ -40,9 +40,9 @@ def hood_canal_curtain(file,img_file,varname,n=1,clim=None): # Hood Canal
 		
 		(data, coords) = rompy.extract(file, varname=varname, extraction_type='profile', x=x, y=y)
 		
-		title = 'Hood Canal %s %s' % (var_title_map[var], extract_utils.file_time(file).isoformat())
+		title = 'Hood Canal %s %s' % (var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
 		
-		plot_utils.plot_parker(coords=coords, data=data, varname=varname, region='Hood Canal', filename=img_file, n=n,  x_axis_offset=utils.offset_region(coords), clim=clim, cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution)
+		plot_utils.plot_parker(coords=coords, data=data, varname=varname, region='Hood Canal', filename=img_file, n=n,  x_axis_offset=utils.offset_region(coords), clim=clim, cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname])
 
 def hood_canal_U_curtain(file,img_file,n=1,clim=None): # velocity in Hood Canal
 	x,y = utils.high_res_hood_canal_xy(n=n)
@@ -61,11 +61,11 @@ def hood_canal_U_curtain(file,img_file,n=1,clim=None): # velocity in Hood Canal
 	
 	data = np.ma.array(data, mask=np.abs(data) > 100)
 	
-	title = 'Hood Canal %s %s' % (var_title_map[var], extract_utils.file_time(file).isoformat())
+	title = 'Hood Canal %s %s' % (var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
 	
 	hood_U_clim = (np.array(clim)/2.0).tolist()
 	
-	plot_utils.plot_parker(coords=coords,data=data,varname='U', region='Hood Canal', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords), cmap='red_blue', title=title, resolution=inset_coastline_resolution)
+	plot_utils.plot_parker(coords=coords,data=data,varname='U', region='Hood Canal', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords), cmap='red_blue', title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map['U'])
 
 def main_basin_U_curtain(file,img_file,n=1,clim=None): # velocity in Main Basin
 	x,y = utils.high_res_main_basin_xy(n=n)
@@ -84,9 +84,9 @@ def main_basin_U_curtain(file,img_file,n=1,clim=None): # velocity in Main Basin
 	
 	data = np.ma.array(data, mask=np.abs(data) > 100)
 	
-	title = 'Main Basin %s %s' % (var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
+	title = 'Main Basin %s %s' % (var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
 	
-	plot_utils.plot_parker(coords=coords,data=data,varname='U', region=' Main Basin', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords),cmap='red_blue', title=title, resolution=inset_coastline_resolution)
+	plot_utils.plot_parker(coords=coords,data=data,varname='U', region=' Main Basin', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords),cmap='red_blue', title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map['U'])
 
 # begin actual code that runs.
 
@@ -109,6 +109,8 @@ title_time_fmt = '%Y-%m-%d %H:%M UTC'
 
 clims = {'salt':[0, 21,33, 33], 'temp': [8, 20], 'U':[-2,2]}
 
+clabel_map = {'temp': u'\u00B0 C', 'salt': 'psu', 'U': 'm/s'}
+
 inset_coastline_resolution = 'f'
 whole_domain_coastline_res = 'f'
 
@@ -124,12 +126,12 @@ for file in file_list:
 		surface_img_file = '%s/%s_surface_%s.png' % (img_dir, ncf_index, var)
 		
 		print('making hood canal %s' % var)
-#		hood_canal_curtain(file, hood_img_file, var, n=8, clim=clims[var])
+		hood_canal_curtain(file, hood_img_file, var, n=8, clim=clims[var])
 		print('making main basin %s' % var)
 		main_basin_curtain(file, main_img_file, var, n=8, clim=clims[var])
 		if not var == 'U':
 			print('making surface %s' % var)
-#			surface_map(file,surface_img_file,var,clim=clims[var])
+			surface_map(file,surface_img_file,var,clim=clims[var])
 
 
 

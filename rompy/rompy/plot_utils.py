@@ -1,4 +1,5 @@
 import datetime as dt
+import time
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -14,7 +15,7 @@ import matplotlib.pyplot as plt
 import utils
 
 def time_series_formatter(x,pos=None):
-	return dt.datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M')
+	return dt.datetime.fromtimestamp(x).strftime('%Y-%m-%d %H:%MZ')
 
 def map_varname(v):
 	mapping = {
@@ -198,7 +199,7 @@ def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	ax.grid()
 	FigureCanvas(fig).print_png(filename)
 
-def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='h',clim=None,cmap='banas_hsv_cm',title=None):
+def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='h',clim=None,cmap='banas_hsv_cm',title=None, caxis_label=None):
 	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 #	ax = fig.add_subplot(111)
 	longest_side_size = 24.0
@@ -266,6 +267,8 @@ def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution
 	m2.drawcoastlines(linewidth=0.5)
 	
 	my_colorbar = fig.colorbar(sm,cax=cax)
+	if not caxis_label == None:
+		my_colorbar.set_label(caxis_label)
 	
 	if not title == None:
 		ax1.set_title(title)
@@ -393,7 +396,7 @@ def plot_mickett(coords,data,varname='',region='',filename='/Users/lederer/tmp/r
 	
 	FigureCanvas(fig).print_png(filename)
 
-def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_series_profile.png',clim=None,cmap='banas_hsv_cm',varname=None):
+def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_series_profile.png',clim=None,cmap='banas_hsv_cm',varname=None, title=None, caxis_label=None):
 	
 	fontsize = 8
 	
@@ -403,7 +406,7 @@ def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_serie
 	fig = Figure(facecolor='white')
 	ax1 = fig.add_axes([0.1, 0.55, 0.75, 0.32])
 	ax2 = fig.add_axes([0.1, 0.18, 0.75, 0.32])
-	cax = fig.add_axes([0.9, 0.1, 0.02, 0.8],frameon=False)
+	cax = fig.add_axes([0.9, 0.18, 0.02, 0.69],frameon=False)
 	
 	my_plot11 = ax1.contourf(t,z,d,100,norm=norm,cmap=cmap)
 	my_plot12 = ax1.contour(t,z,d,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
@@ -411,9 +414,43 @@ def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_serie
 	my_plot22 = ax2.contour(t,z,d,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
 
 	my_colorbar = fig.colorbar(sm,cax=cax)
+	if not caxis_label == None:
+		my_colorbar.set_label(caxis_label)
 	
 	ax1.set_ylim(-20,2)
 	ax1.set_xlim(t[0][0],t[-1][-1])
+	
+	# lets pick some x ticks that aren't stupid
+	xmin_dt = dt.datetime.fromtimestamp(t[0][0])
+	xmax_dt = dt.datetime.fromtimestamp(t[-1][-1])
+	time_window = xmax_dt -xmin_dt
+	if (time_window) < dt.timedelta(hours=48):
+		date_list = []
+		next_time = xmax_dt- dt.timedelta(seconds = xmax_dt.minute*60 + xmax_dt.second)
+		while next_time >= xmin_dt:
+			date_list.append(next_time)
+			next_time = next_time - dt.timedelta(hours=6)
+	
+	elif (time_window) < dt.timedelta(days=8):
+		date_list = []
+		next_time = xmax_dt - dt.timedelta(seconds = (xmax_dt.hour*60 + xmax_dt.minute)*60 + xmax_dt.second)
+		while next_time >= xmin_dt:
+			date_list.append(next_time)
+			next_time = next_time - dt.timedelta(days=1)
+	
+	elif (time_window) < dt.timedelta(days=50):
+		date_list = []
+		next_time = xmax_dt - dt.timedelta(seconds = (xmax_dt.hour*60 + xmax_dt.minute)*60 + xmax_dt.second)
+		while next_time >= xmin_dt:
+			date_list.append(next_time)
+			next_time = next_time - dt.timedelta(days=7)
+	else :
+		date_list = [xmin_dt, xmax_dt]
+	x_tick_list = []
+	for date in date_list:
+		x_tick_list.append(time.mktime(date.timetuple()))
+	ax2.xaxis.set_major_locator(ticker.FixedLocator(x_tick_list))
+	
 	for yticklabel in ax1.get_yticklabels():
 			yticklabel.set_fontsize(fontsize)
 	ax1.set_xticklabels('')
@@ -429,10 +466,14 @@ def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_serie
 		label.set_ha('right')
 		label.set_rotation(30)
 	
-	ax1.set_title('%s Over Time at a Point'% map_varname(varname))
+	if title == None or title == '':
+		ax1.set_title('%s Over Time at a Point'% map_varname(varname))
+	else:
+		ax1.set_title(title)
+	
 	FigureCanvas(fig).print_png(filename)
 	
-def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='i',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None):
+def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='i',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None, caxis_label=None):
 	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 	fontsize = 8
 	
@@ -487,6 +528,9 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 		yticklabel.set_fontsize(fontsize)
 	
 	my_colorbar = fig.colorbar(sm,cax=cax)
+	if not caxis_label == None:
+		my_colorbar.set_label(caxis_label)
+	
 	if labeled_contour_gap is not None:
 		my_colorbar.add_lines(my_plot23)
 	

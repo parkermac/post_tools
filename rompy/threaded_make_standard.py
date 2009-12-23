@@ -61,6 +61,14 @@ else:
 	p = Popen('./make_movie.py /Volumes/lederer/Sites/rompy/movies image_sequence 1 6',shell=True,stdout=PIPE)
 	sts = os.waitpid(p.pid, 0)[1]
 	
+	print('making Hoodsport time series for salinity')
+	p = Popen('./make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f /Volumes/lederer/Sites/rompy/movies/hoodsport_salt.png',shell=True,stdout=PIPE)
+	sts = os.waitpid(p.pid, 0)[1]
+	
+	print('making Hoodsport time series for temperature')
+	p = Popen('./make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f /Volumes/lederer/Sites/rompy/movies/hoodsport_temp.png',shell=True,stdout=PIPE)
+	sts = os.waitpid(p.pid, 0)[1]
+	
 	print ('threaded_make_standard task completed. Total time elapsed: %d seconds' %(dt.datetime.today() - today).seconds)
 
 
