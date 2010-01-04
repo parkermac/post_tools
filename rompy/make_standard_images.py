@@ -27,7 +27,7 @@ def main_basin_curtain(file,img_file,varname,n=4,clim=None): # Main Basin
 		
 		(data, coords) = rompy.extract(file, varname=varname, 	extraction_type='profile', x=x, y=y)
 		
-		title = 'Main Basin %s %s' % (var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
+		title = '%s %s Main Basin %s %s' % (extract_utils.run_id(file), file, var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
 		
 		plot_utils.plot_parker(coords=coords, data=data, varname=varname, 	region='Main Basin', filename=img_file, n=n, x_axis_offset=utils.offset_region(coords), clim=clim,cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname])
 	
@@ -40,7 +40,7 @@ def hood_canal_curtain(file,img_file,varname,n=1,clim=None): # Hood Canal
 		
 		(data, coords) = rompy.extract(file, varname=varname, extraction_type='profile', x=x, y=y)
 		
-		title = 'Hood Canal %s %s' % (var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
+		title = '%s %s Hood Canal %s %s' % (extract_utils.run_id(file), file, var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
 		
 		plot_utils.plot_parker(coords=coords, data=data, varname=varname, region='Hood Canal', filename=img_file, n=n,  x_axis_offset=utils.offset_region(coords), clim=clim, cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname])
 
@@ -61,7 +61,7 @@ def hood_canal_U_curtain(file,img_file,n=1,clim=None): # velocity in Hood Canal
 	
 	data = np.ma.array(data, mask=np.abs(data) > 100)
 	
-	title = 'Hood Canal %s %s' % (var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
+	title = '%s %s Hood Canal %s %s' % (extract_utils.run_id(file), file, var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
 	
 	hood_U_clim = (np.array(clim)/2.0).tolist()
 	
@@ -84,13 +84,44 @@ def main_basin_U_curtain(file,img_file,n=1,clim=None): # velocity in Main Basin
 	
 	data = np.ma.array(data, mask=np.abs(data) > 100)
 	
-	title = 'Main Basin %s %s' % (var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
+	title = '%s %s Main Basin %s %s' % (extract_utils.run_id(file), file, var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
 	
 	plot_utils.plot_parker(coords=coords,data=data,varname='U', region=' Main Basin', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords),cmap='red_blue', title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map['U'])
 
 # begin actual code that runs.
 
 parser = OptionParser()
+
+parser.add_option('-C', '--crude',
+					dest='crude_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to crude')
+
+parser.add_option('-L', '--low',
+					dest='low_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to low')
+
+parser.add_option('-I', '--intermediate',
+					dest='int_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to intermediate')
+
+parser.add_option('-H', '--high',
+					dest='high_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to high')
+
+parser.add_option('-F', '--full',
+					dest='full_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to full')
+
 (options, args) = parser.parse_args()
 
 if args == []:
@@ -111,8 +142,24 @@ clims = {'salt':[0, 21,33, 33], 'temp': [8, 20], 'U':[-2,2]}
 
 clabel_map = {'temp': u'\u00B0 C', 'salt': 'psu', 'U': 'm/s'}
 
-inset_coastline_resolution = 'f'
-whole_domain_coastline_res = 'f'
+if options.crude_coast:
+	inset_coastline_resolution = 'c'
+	whole_domain_coastline_res = 'c'
+elif options.low_coast:
+	inset_coastline_resolution = 'l'
+	whole_domain_coastline_res = 'l'
+elif options.int_coast:
+	inset_coastline_resolution = 'i'
+	whole_domain_coastline_res = 'i'
+elif options.high_coast:
+	inset_coastline_resolution = 'h'
+	whole_domain_coastline_res = 'h'
+elif options.full_coast:
+	inset_coastline_resolution = 'f'
+	whole_domain_coastline_res = 'f'
+else:
+	inset_coastline_resolution = 'f'
+	whole_domain_coastline_res = 'f'
 
 for file in file_list:
 	ncf_index = file[:-3]

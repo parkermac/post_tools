@@ -29,10 +29,53 @@ class Worker(threading.Thread):
 				break
 
 parser = OptionParser()
+parser.add_option('-C', '--crude',
+					dest='crude_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to crude')
+
+parser.add_option('-L', '--low',
+					dest='low_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to low')
+
+parser.add_option('-I', '--intermediate',
+					dest='int_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to intermediate')
+
+parser.add_option('-H', '--high',
+					dest='high_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to high')
+
+parser.add_option('-F', '--full',
+					dest='full_coast',
+					action='store_true',
+					default=False,
+					help='this option will set the coastline resolution to full')
+
 WORKERS = os.sysconf('SC_NPROCESSORS_ONLN')
 (options, args) = parser.parse_args()
 
-cmd = './make_standard_images.py '
+cmd_base = './make_standard_images.py '
+
+if options.crude_coast:
+	cmd = cmd_base + '-C '
+elif options.low_coast:
+	cmd = cmd_base + '-L '
+elif options.int_coast:
+	cmd = cmd_base + '-I '
+elif options.high_coast:
+	cmd = cmd_base + '-H '
+elif options.full_coast:
+	cmd = cmd_base + '-F '
+else:
+	cmd = cmd_base + '-F '
 
 today   = dt.datetime.today()
 
