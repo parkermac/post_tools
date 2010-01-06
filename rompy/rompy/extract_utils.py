@@ -37,7 +37,7 @@ def calc_num_time_slices(file1,file2,td):
 	
 	return int(gap_seconds/td_seconds + 1)
 
-def filelist_from_datelist(datelist, basedir='/Users/lederer/Repositories/PSVS/rompy/', basename='ocean_his_*.nc'):
+def filelist_from_datelist(datelist, basedir='./', basename='ocean_his_*.nc'):
 	files = glob.glob(os.path.join(basedir,basename))
 	files.sort()
 	

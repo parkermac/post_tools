@@ -122,6 +122,11 @@ parser.add_option('-F', '--full',
 					default=False,
 					help='this option will set the coastline resolution to full')
 
+parser.add_option('-i', '--img_dir',
+					dest=img_dir,
+					default='./image_sequence',
+					help='Location to save images. Default is ./image_sequnce')
+
 (options, args) = parser.parse_args()
 
 if args == []:
@@ -131,7 +136,7 @@ if args == []:
 else:
 	file_list = args
 
-img_dir = '/Users/lederer/Repositories/PSVS/rompy/image_sequence'
+img_dir = options.img_dir
 
 var_list = ['salt','temp','U']
 

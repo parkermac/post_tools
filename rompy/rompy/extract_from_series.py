@@ -162,8 +162,8 @@ def extract_from_series(file_list,extraction_type='point',varname='zeta',**kwarg
 		return (data, ocean_time,z)
 	return
 
-def extract_from_datetime_list(datelist,x,y,varname='salt',**kwargs):
-	filelist = extract_utils.filelist_from_datelist(datelist)
+def extract_from_datetime_list(datelist,x,y,varname='salt',basedir='./',**kwargs):
+	filelist = extract_utils.filelist_from_datelist(datelist, basedir=basedir)
 	for f in filelist:
 		(d0,ot0,z0) = extract_from_series([f['file0']],x=x,y=y,varname=varname,extraction_type='profile',**kwargs)
 		(d1,ot1,z1) = extract_from_series([f['file1']],x=x,y=y,varname=varname,extraction_type='profile',**kwargs)
@@ -186,7 +186,7 @@ def extract_from_datetime_list(datelist,x,y,varname='salt',**kwargs):
 		z[:,i] = filelist[i]['z'].T
 	return (d,ot,z)
 
-def extract_from_two_datetimes(x,y,dt0,dt1,varname='salt',interval=3600,**kwargs):
+def extract_from_two_datetimes(x,y,dt0,dt1,varname='salt',interval=3600,basedir='./',**kwargs):
 	t0 = time.mktime(dt0.timetuple())
 	t1 = time.mktime(dt1.timetuple())
 	interval = float(interval)

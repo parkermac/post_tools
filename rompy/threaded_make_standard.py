@@ -2,6 +2,7 @@
 import os
 import glob
 import datetime as dt
+import platform
 from optparse import OptionParser
 
 import threading
@@ -100,17 +101,27 @@ except (KeyboardInterrupt, SystemExit):
 else:
 	queue.join()
 	
-	print('Making the movies and putting them on metoc1')
-	p = Popen('./make_movie.py /Volumes/lederer/Sites/rompy/movies image_sequence 1 6',shell=True,stdout=PIPE)
-	sts = os.waitpid(p.pid, 0)[1]
+	if platform.system() == 'Darwin':
+		print('Making the movies and putting them on metoc1')
+		p = Popen('./make_movie.py /Volumes/lederer/Sites/rompy/movies image_sequence 1 6',shell=True,stdout=PIPE)
+		sts = os.waitpid(p.pid, 0)[1]
 	
-	print('making Hoodsport time series for salinity')
-	p = Popen('./make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f /Volumes/lederer/Sites/rompy/movies/hoodsport_salt.png',shell=True,stdout=PIPE)
-	sts = os.waitpid(p.pid, 0)[1]
-	
-	print('making Hoodsport time series for temperature')
-	p = Popen('./make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f /Volumes/lederer/Sites/rompy/movies/hoodsport_temp.png',shell=True,stdout=PIPE)
-	sts = os.waitpid(p.pid, 0)[1]
+		print('making Hoodsport time series for salinity')
+		p = Popen('./make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f /Volumes/lederer/Sites/rompy/movies/hoodsport_salt.png',shell=True,stdout=PIPE)
+		sts = os.waitpid(p.pid, 0)[1]
+		
+		print('making Hoodsport time series for temperature')
+		p = Popen('./make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f /Volumes/lederer/Sites/rompy/movies/hoodsport_temp.png',shell=True,stdout=PIPE)
+		sts = os.waitpid(p.pid, 0)[1]
+		
+	elif platform.system() == 'Linux':
+		print('making Hoodsport time series for salinity')
+		p = Popen('./make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f hoodsport_salt.png -a 200607010000 -b 200608010000',shell=True,stdout=PIPE)
+		sts = os.waitpid(p.pid, 0)[1]
+		
+		print('making Hoodsport time series for temperature')
+		p = Popen('./make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f hoodsport_temp.png -a 200607010000 -b 200608010000',shell=True,stdout=PIPE)
+		sts = os.waitpid(p.pid, 0)[1]
 	
 	print ('threaded_make_standard task completed. Total time elapsed: %d seconds' %(dt.datetime.today() - today).seconds)
 
