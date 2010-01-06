@@ -120,4 +120,6 @@ plot_time_series(varname=options.varname,
 					seconds=int(options.seconds),
 					filelist=args,
 					imgfile=options.imgfile,
-					title=options.title)
+					title=options.title,
+					dt0=options.dt0,
+					dt1=options.dt1)
