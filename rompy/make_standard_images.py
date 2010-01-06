@@ -123,7 +123,7 @@ parser.add_option('-F', '--full',
 					help='this option will set the coastline resolution to full')
 
 parser.add_option('-i', '--img_dir',
-					dest=img_dir,
+					dest='img_dir',
 					default='./image_sequence',
 					help='Location to save images. Default is ./image_sequnce')
 
