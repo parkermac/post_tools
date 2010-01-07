@@ -115,28 +115,23 @@ else:
 		sts = os.waitpid(p.pid, 0)[1]
 		
 	elif platform.system() == 'Linux':
-		print('making Hoodsport time series for salinity')
-		p = Popen('./make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f image_sequence/hoodsport_salt_200606.png -a 200606010000 -b 200607010000',shell=True,stdout=PIPE)
-		sts = os.waitpid(p.pid, 0)[1]
+		dt0 = dt.datetime(2006,1,1,0,0)
 		
-		print('making Hoodsport time series for temperature')
-		p = Popen('./make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f image_sequence/hoodsport_temp_200606.png -a 200606010000 -b 200607010000',shell=True,stdout=PIPE)
-		sts = os.waitpid(p.pid, 0)[1]
-		
-		print('making Hoodsport time series for salinity')
-		p = Popen('./make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f image_sequence/hoodsport_salt_200607.png -a 200607010000 -b 200608010000',shell=True,stdout=PIPE)
-		sts = os.waitpid(p.pid, 0)[1]
-		
-		print('making Hoodsport time series for temperature')
-		p = Popen('./make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f image_sequence/hoodsport_temp_200607.png -a 200607010000 -b 200608010000',shell=True,stdout=PIPE)
-		sts = os.waitpid(p.pid, 0)[1]
-		
-		print('making Hoodsport time series for salinity')
-		p = Popen('./make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f image_sequence/hoodsport_salt_200608.png -a 200608010000 -b 200609010000',shell=True,stdout=PIPE)
-		sts = os.waitpid(p.pid, 0)[1]
-		
-		print('making Hoodsport time series for temperature')
-		p = Popen('./make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f image_sequence/hoodsport_temp_200608.png -a 200608010000 -b 200609010000',shell=True,stdout=PIPE)
-		sts = os.waitpid(p.pid, 0)[1]
+		while dt0 < dt.datetime(2007,1,1,0,0):
+			if dt0.month < 12:
+				dt1 = dt0.replace(month=dt0.month + 1)
+			else:
+				dt1 = dt.datetime(dt0.year + 1,1,1,0,0)
+
+			cmd = './make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f image_sequence/hoodsport_salt_%s.png -a %s -b %s' % (dt0.strftime('%Y%m'),dt0.strftime('%Y%m%d%H%M'), dt1.strftime('%Y%m%d%H%M'))
+			print(cmd)
+			p = Popen(cmd,shell=True,stdout=PIPE)
+ 			sts = os.waitpid(p.pid, 0)[1]
+			
+			cmd = './make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f image_sequence/hoodsport_temp_%s.png -a %s -b %s' % (dt0.strftime('%Y%m'),dt0.strftime('%Y%m%d%H%M'), dt1.strftime('%Y%m%d%H%M'))
+			print(cmd)
+			p = Popen(cmd,shell=True,stdout=PIPE)
+	 		sts = os.waitpid(p.pid, 0)[1]
+			dt0 = dt1
 	
 	print ('threaded_make_standard task completed. Total time elapsed: %d seconds' %(dt.datetime.today() - today).seconds)
