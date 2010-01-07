@@ -79,4 +79,13 @@ def filelist_from_datelist(datelist, basedir='./', basename='ocean_his_*.nc'):
 	
 def run_id(f):
 	ncf = nc.Dataset(f,'r')
-	return ncf.script_file[0:-3]
+	rid = ncf.script_file[0:-3]
+	ncf.close()
+	return rid
+	
+def run_title(f):
+	ncf = nc.Dataset(f,'r')
+	title = ncf.title
+	ncf.close()
+	return title
+	
