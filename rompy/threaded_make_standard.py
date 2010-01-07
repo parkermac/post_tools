@@ -140,5 +140,3 @@ else:
 		sts = os.waitpid(p.pid, 0)[1]
 	
 	print ('threaded_make_standard task completed. Total time elapsed: %d seconds' %(dt.datetime.today() - today).seconds)
-
-

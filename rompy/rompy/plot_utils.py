@@ -598,3 +598,4 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 	pcm2 = m.plot(x[0:-1:n],y[0:-1:n],'.k')
 	
 	FigureCanvas(fig).print_png(filename)
+	
