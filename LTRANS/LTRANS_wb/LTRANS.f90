@@ -102,7 +102,7 @@ PROGRAM main
   USE HTURB_MOD,      ONLY: HTURB
   USE VTURB_MOD,      ONLY: VTURB
   USE BEHAVIOR_MOD,   ONLY: INITBEHAVE,UPDATESTATUS,BEHAVE,GETCOLOR     
-  USE SETTLEMENT_MOD, ONLY: SETTLED,DEAD,SETTLEMENT
+  USE SETTLEMENT_MOD, ONLY: SETTLED,DEAD,SETTLEMENT,DIE
 
   USE HYDRO_MOD, ONLY: initGrid,initHydro,updateHydro,setEle,setInterp,getInterp,getSlevel,getWlevel,WCTS_ITPI
 
@@ -156,6 +156,8 @@ INTEGER :: ele_err
 ! Character String for Program Termination Read Statements
 CHARACTER :: anykey
 
+! added by NCL
+!logical :: particle_n_is_dead
 
 ! ***************************************************************************
 ! *																			*
@@ -335,7 +337,16 @@ DO p=1,stepT     !External time step
         if(settlementon)then
           if ( SETTLED(n) .OR. DEAD(n) ) cycle
         endif
-
+        
+        ! NCL the code doesn't really work well. We want to be able to turn off particles
+        ! that no longer make sense (left the domain, stuck on land, etc.) but we don't want
+        ! to use the settlement module because it is overly complicated.
+        if ( SETTLED(n) .OR. DEAD(n) ) then
+!          write(*,*) n, ' particle is dead'
+          cycle
+        endif
+        
+        
 !			*********************************************************
 !			*														*
 !			*			Find Element that Contains Particle		    *
@@ -353,6 +364,7 @@ DO p=1,stepT     !External time step
 		  call mbounds(Ypar,Xpar,inbounds)
 		  if (inbounds.EQ.0) then 
 			write(*,*) 'outside main bounds, n=',n
+			call DIE(n)
 !			write(*,*) ' '
 !			write(*,*) 'The Program Cannot Continue and Will Terminate'
 !			write(*,*) 'Press Any Key and Enter'
@@ -365,12 +377,12 @@ DO p=1,stepT     !External time step
           call ibounds(in_island,Ypar,Xpar,island)
           if (in_island.EQ.1) then
             write(*,*) 'in island, n=',n
+            call DIE(n)
 !            write(*,*) ' '
 !            write(*,*) 'The Program Cannot Continue and Will Terminate'
 !            write(*,*) 'Press Any Key and Enter'
 !            read(*,*) anykey
 !            stop
-            exit
           endif
 
           !Determine which Rho, U, & V elements the particle is in
@@ -387,6 +399,7 @@ DO p=1,stepT     !External time step
         !If the particle was not found to be within an element,
 		!  write a message to the screen and discontinue the program
         IF(ele_err > 0)THEN
+          call DIE(n)
 !          SELECT CASE (ele_err)
 !            CASE(1)
 !              write(*,*) n,'start - particle outside model domain (rho)'
@@ -419,7 +432,7 @@ DO p=1,stepT     !External time step
 !          write(*,*) 'Problem with particle ', n
           exit
         else
-          write(*,*) 'Should be good to go with particle ', n
+!          write(*,*) 'Should be good to go with particle ', n
         ENDIF
 
         !Set Interpolation Values for the current particle
@@ -685,49 +698,64 @@ DO p=1,stepT     !External time step
         skipbound = -1
         reflects = 0
         do
-          call intersect_reflect(Xpos,Ypos,nXpos,nYpos,fintersectX,fintersectY,         &
-                 freflectX,freflectY,intersectf,skipbound)
-          if(intersectf == 0)exit
-          reflects = reflects + 1
-          if(reflects > 3) then
-            write(*,*) n,'still out after 3rd reflection.'
-            write(*,*) ' '
-            write(*,*) 'The Program Cannot Continue and Will Terminate'
-            write(*,*) 'Press Any Key and Enter'
-            read(*,*) anykey
-            stop
-            !Set particle location equal to previous location
-            newXpos=P_xyz(n,1)
-            newYpos=P_xyz(n,2)
+          if (.NOT. DEAD(n)) then 
+            call intersect_reflect(Xpos,Ypos,nXpos,nYpos,fintersectX,fintersectY,         &
+                   freflectX,freflectY,intersectf,skipbound)
+            if(intersectf == 0)exit
+            reflects = reflects + 1
+            if(reflects > 3) then
+              write(*,*) n,'still out after 3rd reflection.'
+              call DIE(n)
+!             write(*,*) ' '
+!             write(*,*) 'The Program Cannot Continue and Will Terminate'
+!             write(*,*) 'Press Any Key and Enter'
+!             read(*,*) anykey
+!             stop
+             !Set particle location equal to previous location
+              newXpos=P_xyz(n,1)
+              newYpos=P_xyz(n,2)
+		    endif
+		    Xpos = fintersectX
+		    Ypos = fintersectY
+		    nXpos = freflectX
+		    nYpos = freflectY
+		  else
+		    exit
 		  endif
-		  Xpos = fintersectX
-		  Ypos = fintersectY
-		  nXpos = freflectX
-		  nYpos = freflectY
-        enddo
+       enddo
 
-        newXpos = nXpos
-        newYpos = nYpos
+       newXpos = nXpos
+       newYpos = nYpos
 
         !Check to make sure new position is within model boundaries
+       if (.NOT. DEAD(n)) then
         call mbounds(newYpos,newXpos,inbounds)
         if(inbounds /= 1) then
           write(*,*) 'ERROR: Particle Outside Main Boundaries After Intersect_Reflect'
-          write(*,*) 'Model Run Cannot Continue'
-          write(*,*) 'Press Any Key and Enter'
-          read(*,*) anykey
-          stop
+!          write(*,*) 'Model Run Cannot Continue'
+!          write(*,*) 'Press Any Key and Enter'
+!          read(*,*) anykey
+          call DIE(n)
+          cycle
         endif
+       else
+         cycle
+       endif
 
         !Check to make sure new position is not within an island
-        call ibounds(in_island,newYpos,newXpos,island)
-        if(in_island == 1) then
-          write(*,*) 'ERROR: Particle Inside Island Boundaries After Intersect_Reflect'
-          write(*,*) 'Model Run Cannot Continue'
-          write(*,*) 'Press Any Key and Enter'
-          read(*,*) anykey
-          stop
-        endif
+       if (.NOT. DEAD(n)) then
+         call ibounds(in_island,newYpos,newXpos,island)
+         if(in_island == 1) then
+           write(*,*) 'ERROR: Particle Inside Island Boundaries After Intersect_Reflect'
+!           write(*,*) 'Model Run Cannot Continue'
+!           write(*,*) 'Press Any Key and Enter'
+!           read(*,*) anykey
+           call DIE(n)
+           cycle
+         endif
+       else
+         cycle
+       endif
 !      End boundary condition tests ******************* 
 
 		!Assign new particle positions to newP_xyz matrix
@@ -749,6 +777,7 @@ DO p=1,stepT     !External time step
             CASE(6)
               write(*,*) "Jumped over a v element"
           END SELECT
+          call DIE(n)
 !
 !          write(*,*) " "
 !          write(*,*)" - Now Stopped -"

@@ -1,7 +1,7 @@
 ! ******************************* LTRANS Include File *******************************
 
 !*** NUMBER OF PARTICLES ***
-INTEGER, PARAMETER :: numpar = 10 !13738          ! Number of particles
+INTEGER, PARAMETER :: numpar = 11672          ! Number of particles
 
 !*** TIME PARAMETERS ***
 !REAL,    PARAMETER :: days   = 5.625        ! Number of days to run the model

@@ -43,7 +43,7 @@ LIB = -L/usr/local/lib -lnetcdf -lhdf5_hl -lhdf5 /usr/local/lib/libnetcdff.a /us
 
 .SUFFIXES : .f90
 
-LTRANS.exe: $(OBJ)
+LTRANS.exe: $(OBJ) LTRANS.f90
 	$(FC) LTRANS.f90 -o $@ $(FFLAGS) $(OBJ) $(LIB)
 
 $(BEHAVIOR_MOD): $(PARAM_MOD) $(SETTLEMENT_MOD) $(HYDRO_MOD) $(NORM_MOD) $(RANDOM_MOD)

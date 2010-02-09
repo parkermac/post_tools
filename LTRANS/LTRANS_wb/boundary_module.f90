@@ -1413,7 +1413,7 @@ END SUBROUTINE getNext
 	INTEGER :: i
 	DOUBLE PRECISION :: blatlon(maxbound,2)
     
-    write(*,*) Xpos, " ", Ypos
+!    write(*,*) Xpos, " ", Ypos
     
 	!read main boundaries into one variable for INPOLY
 	do i=1,maxbound
