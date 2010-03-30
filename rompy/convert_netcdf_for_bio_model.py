@@ -34,7 +34,12 @@ def new_var_copy_of_old_var(ncf, ovn, nvn, nc_var_type='f8'):
 	
 	ovdv = dim2vals(ovd, ncf)
 	
-	nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	try:
+		nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	except RuntimeError, e:
+		print(e)
+		print('Overwriting variable "%s"' % nvn)
+		nv = ncf.variables[nvn]
 	
 	n = nv[:]
 	o = ov[:]
@@ -48,7 +53,12 @@ def uniform_new_var_from_old(ncf, ovn, nvn, fill_val=0.0, long_name=None, units=
 	
 	ovdv = dim2vals(ovd, ncf)
 	
-	nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	try:
+		nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	except RuntimeError, e:
+		print(e)
+		print('Overwriting variable "%s"' % nvn)
+		nv = ncf.variables[nvn]
 	
 	nv[:] = fill_val*np.ones(ovdv)
 	
@@ -74,7 +84,12 @@ def new_var_linear_function_of_old_var(ncf, ovn, nvn, a=0.0, b=1.0, long_name=No
 	
 	ovdv = dim2vals(ovd, ncf)
 	
-	nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	try:
+		nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	except RuntimeError, e:
+		print(e)
+		print('Overwriting variable "%s"' % nvn)
+		nv = ncf.variables[nvn]
 	
 	n = nv[:]
 	o = ov[:]
@@ -122,7 +137,12 @@ def new_var_function_of_old_var_and_depth(ncf,ovn,nvn,grd_ncf, long_name=None, u
 	ovdv = dim2vals(ovd, ncf)
 	print(ovdv)
 	
-	nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	try:
+		nv = ncf.createVariable(nvn, nc_var_type, ovd)
+	except RuntimeError, e:
+		print(e)
+		print('Overwriting variable "%s"' % nvn)
+		nv = ncf.variables[nvn]
 	
 	n = nv[:]
 	o = ov[:]
