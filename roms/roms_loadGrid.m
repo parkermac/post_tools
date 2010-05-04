@@ -19,8 +19,10 @@ G.lonu = nc_varget(fname, 'lon_u');
 G.latu = nc_varget(fname, 'lat_u');
 G.lonv = nc_varget(fname, 'lon_v');
 G.latv = nc_varget(fname, 'lat_v');
-G.cs = nc_varget(fname, 'Cs_r');
-G.csw = nc_varget(fname, 'Cs_w');
+try
+	G.cs = nc_varget(fname, 'Cs_r');
+	G.csw = nc_varget(fname, 'Cs_w');
+end
 
 G.mask = nc_varget(fname,'mask_rho');
 G.masku = nc_varget(fname,'mask_u');

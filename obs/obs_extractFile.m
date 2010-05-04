@@ -5,7 +5,7 @@ function data = obs_extractFile(filename, vars, timeRange, varargin)
 %                                           ..., LatLonVector);
 %                                           ..., z, LatLonVector);
 %
-% routing called by obs_extract to get out observational data. see that
+% routine called by obs_extract to get out observational data. see that
 % mfile for full syntax...
 %
 % written by D. Sutherland and N. Banas, UW, Spring 2009
@@ -111,44 +111,43 @@ nv = length(varlist);
 % now loop over each variable
 for j = 1:nv
     varname = char(varlist(j));
-    if ~nc_isvar(filename,varname) % check to see if variable in the netcdf file
-        error(['variable ''' varname ''' not found in ' filename '.']);
-    end
-    % now put each variable into data structure, all for now, then truncate later
-    disp(['    extracting ' varname ' from ' filename])
-    datavec = nc_varget(filename, varname);
-    if(strcmp(varname,'pressure')); %if variable is pressure, use from before
-        datavec = data.pressure;
-    end
-    %%% interpolate to depth
-    if(do_depth)
-      data_int = []; tint = [];
-      datavec = datavec(good); tgood = data.time(good); dint = dd(good);
-      if(Nn>1); ntime = length(tgood)/Nn;
-         tgood = reshape(tgood,ntime,Nn); 
-         datavec = reshape(datavec,ntime,Nn);
-         dint = reshape(dint,ntime,Nn);
-         for jj = 1:ntime
-            ind = find(~isnan(datavec(jj,:))); if(isempty(ind));ind=1:Nn;end
-            data_int(jj)=interp1(dint(jj,ind),datavec(jj,ind),tdepth);              
-            tint(jj) = tgood(jj,1);
-         end
-      else
-        [junk, first, junk2] = unique(tgood, 'first');
-        [junk, last, junk2] = unique(tgood, 'last');
-        data.time_index = sort([first(:) last(:)]);
-        ntime = length(data.time_index(:,1));
-        for jj = 1:ntime
-            ind = data.time_index(jj,1):data.time_index(jj,2);
-            data_int(jj)=interp1(dint(ind),datavec(ind),tdepth);              
-            tint(jj) = tgood(ind(1));
-        end
-      end
-      datavec = data_int; 
-      data.(varname) = datavec;
-    else
-      datavec = datavec(good);
-      data.(varname) = datavec;
+    if nc_isvar(filename,varname) % check to see if variable in the netcdf file
+		% now put each variable into data structure, all for now, then truncate later
+		disp(['    extracting ' varname ' from ' filename])
+		datavec = nc_varget(filename, varname);
+		if(strcmp(varname,'pressure')); %if variable is pressure, use from before
+			datavec = data.pressure;
+		end
+		%%% interpolate to depth
+		if(do_depth)
+		  data_int = []; tint = [];
+		  datavec = datavec(good); tgood = data.time(good); dint = dd(good);
+		  if(Nn>1); ntime = length(tgood)/Nn;
+			 tgood = reshape(tgood,ntime,Nn); 
+			 datavec = reshape(datavec,ntime,Nn);
+			 dint = reshape(dint,ntime,Nn);
+			 for jj = 1:ntime
+				ind = find(~isnan(datavec(jj,:))); if(isempty(ind));ind=1:Nn;end
+				data_int(jj)=interp1(dint(jj,ind),datavec(jj,ind),tdepth);              
+				tint(jj) = tgood(jj,1);
+			 end
+		  else
+			[junk, first, junk2] = unique(tgood, 'first');
+			[junk, last, junk2] = unique(tgood, 'last');
+			data.time_index = sort([first(:) last(:)]);
+			ntime = length(data.time_index(:,1));
+			for jj = 1:ntime
+				ind = data.time_index(jj,1):data.time_index(jj,2);
+				data_int(jj)=interp1(dint(ind),datavec(ind),tdepth);              
+				tint(jj) = tgood(ind(1));
+			end
+		  end
+		  datavec = data_int; 
+		  data.(varname) = datavec;
+		else
+		  datavec = datavec(good);
+		  data.(varname) = datavec;
+		end
     end
 end
 if do_depth; data.time = tint; 

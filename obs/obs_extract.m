@@ -47,6 +47,7 @@ if iscell(files)
 		data = catstruct(data,data2);
 	end
 else
+    if verbose, disp(['obs_extract: looking for ' files]); end
 	type = exist(files, 'file');	
 	if type == 7 % input = directory
 		if files(end) ~= '/', files = [files '/']; end %make sure there's a backslash at end
@@ -57,7 +58,8 @@ else
 			if rec.isdir
 				if rec.name(1) ~= '.'
 					% directory within the directory
-					data2 = obs_extract(rec.name, vars, timeRange, varargin{:});
+					fullname = [files rec.name];
+					data2 = obs_extract(fullname, vars, timeRange, varargin{:});
 					data = catstruct(data,data2);
 				end
 			elseif length(rec.name)>3 & strcmp(rec.name(end-2:end),'.nc')
