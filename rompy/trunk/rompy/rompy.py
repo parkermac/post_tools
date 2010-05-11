@@ -1,7 +1,7 @@
 import extract_from_file
 import extract_from_series
 
-__version__ = '0.1'
+__version__ = '0.1.5'
 
 def extract(files,**kwargs):
 	if files.__class__ == str:

@@ -1,7 +1,10 @@
+import os
+
 import numpy as np
 from matplotlib.mlab import griddata
+import netCDF4 as nc
 
-__version__ = '0.1'
+__version__ = '0.1.5'
 
 def interp_2d_latlon(lat,lon,data,lati,loni):
 	return griddata(lat.reshape(lat.size),lon.reshape(lon.size),data.reshape(data.size),lati,loni)
@@ -597,4 +600,24 @@ def offset_region(coords,region='Admiralty Inlet'):
 		if t >= 0.0 and t < 1.0:
 			rval = distances[i] + t*(distances[i+1] - distances[i])
 	return rval
+
+def get_coastline(mode='regional'):
+	module_dir = os.path.dirname(__file__)
+	ncf_name = os.path.join(module_dir,'coastline.nc')
+	try:
+		ncf = nc.Dataset(ncf_name,mode='r')
+		if mode.lower() == 'detailed':
+			lat = ncf.variables['detailed_lat'][:]
+			lon = ncf.variables['detailed_lon'][:]
+			lat[lat==ncf.variables['detailed_lat']._FillValue] = np.nan
+			lon[lon==ncf.variables['detailed_lon']._FillValue] = np.nan			
 			
+		else:
+			lat = ncf.variables['regional_lat'][:]
+			lon = ncf.variables['regional_lon'][:]
+			lat[lat==ncf.variables['regional_lat']._FillValue] = np.nan
+			lon[lon==ncf.variables['regional_lon']._FillValue] = np.nan
+	except Exception, e:
+		print(e)
+	
+	return lon,lat

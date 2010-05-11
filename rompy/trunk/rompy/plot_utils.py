@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import utils
 
-__version__ = '0.1'
+__version__ = '0.1.5'
 
 def time_series_formatter(x,pos=None):
 	return dt.datetime.fromtimestamp(x).strftime('%Y-%m-%d %H:%MZ')
@@ -224,8 +224,10 @@ def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution
 	psbb_urlon = -122.1
 	
 #	print(lllat,urlat,lllon,urlon)
-	m1 = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax1)
-	m2 = Basemap(projection='merc',llcrnrlat=psbb_lllat,urcrnrlat=psbb_urlat,llcrnrlon=psbb_lllon,urcrnrlon=psbb_urlon,resolution='f',ax=ax2)
+#	m1 = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax1)
+#	m2 = Basemap(projection='merc',llcrnrlat=psbb_lllat,urcrnrlat=psbb_urlat,llcrnrlon=psbb_lllon,urcrnrlon=psbb_urlon,resolution='f',ax=ax2)
+	m1 = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution='c',ax=ax1)
+	m2 = Basemap(projection='merc',llcrnrlat=psbb_lllat,urcrnrlat=psbb_urlat,llcrnrlon=psbb_lllon,urcrnrlon=psbb_urlon,resolution='c',ax=ax2)
 	x1,y1 = m1(*(lon,lat))
 	x2,y2 = m2(*(lon,lat))
 
@@ -263,10 +265,14 @@ def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution
 #		norm = Normalize(vmin=clim[0],vmax=clim[-1],clip=False)
 		
 	pcm1 = m1.pcolormesh(x1,y1,data,cmap=cmap,norm=norm)
-	m1.drawcoastlines(linewidth=0.5)
+#	m1.drawcoastlines(linewidth=0.5)
+	regional_coast_lon, regional_coast_lat = m1(*(utils.get_coastline('regional')))
+	m1.plot(regional_coast_lon,regional_coast_lat,'k',linewidth=0.5)
 	
 	pcm2 = m2.pcolormesh(x2,y2,data,cmap=cmap,norm=norm)
-	m2.drawcoastlines(linewidth=0.5)
+#	m2.drawcoastlines(linewidth=0.5)
+	detailed_coast_lon, detailed_coast_lat = m2(*(utils.get_coastline('detailed')))
+	m2.plot(detailed_coast_lon,detailed_coast_lat,'k',linewidth=0.5)
 	
 	my_colorbar = fig.colorbar(sm,cax=cax)
 	if not caxis_label == None:
@@ -591,11 +597,16 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 	urlon = -122.2
 	
 	
-	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax3)
+#	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax3)
+	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution='c',ax=ax3)
 	x,y = m(*(coords['xm'],coords['ym']))
 #	pcm = m.plot(x,y,'r')
-	m.drawcoastlines(linewidth=0.5)
-	m.fillcontinents(color='#ECECEC')
+	coast_lon, coast_lat = m(*(utils.get_coastline('detailed')))
+#	print(coast_lat)
+#	print(coast_lon)
+#	m.drawcoastlines(linewidth=0.5)
+#	m.fillcontinents(color='#ECECEC')
+	m.plot(coast_lon,coast_lat,'k',linewidth=0.5)
 	pcm1 = m.plot(x,y,'r',linewidth=0.5)
 	pcm2 = m.plot(x[0:-1:n],y[0:-1:n],'.k')
 	

@@ -6,14 +6,11 @@ __all__ = [	'extract_from_file',
 			'rompy',
 			'utils']
 
-__version__ = '0.1'
+__version__ = '0.1.5'
 
 import extract_from_file
 import extract_from_series
 import extract_utils
 import load_grid
-import plot_utils
-import rompy
+from rompy import extract
 import utils
-
-del(rompy.test)
