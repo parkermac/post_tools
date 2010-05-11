@@ -1,6 +1,8 @@
 import numpy as np
 from matplotlib.mlab import griddata
 
+__version__ = '0.1'
+
 def interp_2d_latlon(lat,lon,data,lati,loni):
 	return griddata(lat.reshape(lat.size),lon.reshape(lon.size),data.reshape(data.size),lati,loni)
 

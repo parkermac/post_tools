@@ -4,6 +4,8 @@ import netCDF4 as nc
 import numpy as np
 #from scipy.interpolate.fitpack2 import  SmoothBivariateSpline
 
+__version__ = '0.1'
+
 def load_grid(files):
 	'''
 load_grid returns a dictionary of netCDF4 variables. The actual extraction of the data in them from

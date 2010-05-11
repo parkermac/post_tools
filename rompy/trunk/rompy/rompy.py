@@ -1,6 +1,8 @@
 import extract_from_file
 import extract_from_series
 
+__version__ = '0.1'
+
 def extract(files,**kwargs):
 	if files.__class__ == str:
 		if kwargs.has_key('x') and kwargs.has_key('y'):

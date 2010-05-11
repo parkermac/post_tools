@@ -10,6 +10,8 @@ import numpy as np
 import extract_utils
 import extract_from_file
 
+__version__ = '0.1'
+
 # def file_time(f):
 # 	UTC = pytz.timezone('UTC')
 # 	ncf = nc.Dataset(f,mode='r')

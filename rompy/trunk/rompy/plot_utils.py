@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 
 import utils
 
+__version__ = '0.1'
+
 def time_series_formatter(x,pos=None):
 	return dt.datetime.fromtimestamp(x).strftime('%Y-%m-%d %H:%MZ')
 
