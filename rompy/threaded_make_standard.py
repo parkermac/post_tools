@@ -20,6 +20,7 @@ class Worker(threading.Thread):
 			try:
 				file = self.__queue.get(True,4)
 				msi_cmd = cmd + file
+				print(msi_cmd)
 #				a = os.popen(msi_cmd)
 #				a.close()
 				p = Popen(msi_cmd, shell=True, stdout=PIPE)
@@ -60,23 +61,34 @@ parser.add_option('-F', '--full',
 					default=False,
 					help='this option will set the coastline resolution to full')
 
+parser.add_option('-d','--dir',
+					dest='dir',
+					action='store',
+					default='.',
+					help='select the source directory of ocean_his_####.nc files. Defaults to the current directory.')
+
+parser.add_option('-i', '--img_dir',
+					dest='img_dir',
+					default='./image_sequence',
+					help='Location to save images. Default is ./image_sequnce')
+
 WORKERS = os.sysconf('SC_NPROCESSORS_ONLN')
 (options, args) = parser.parse_args()
 
-cmd_base = './make_standard_images.py '
+cmd_base = './make_standard_images.py -i %s' % options.img_dir
 
 if options.crude_coast:
-	cmd = cmd_base + '-C '
+	cmd = cmd_base + ' -C '
 elif options.low_coast:
-	cmd = cmd_base + '-L '
+	cmd = cmd_base + ' -L '
 elif options.int_coast:
-	cmd = cmd_base + '-I '
+	cmd = cmd_base + ' -I '
 elif options.high_coast:
-	cmd = cmd_base + '-H '
+	cmd = cmd_base + ' -H '
 elif options.full_coast:
-	cmd = cmd_base + '-F '
+	cmd = cmd_base + ' -F '
 else:
-	cmd = cmd_base + '-F '
+	cmd = cmd_base + ' -F '
 
 today   = dt.datetime.today()
 
@@ -86,7 +98,7 @@ for i in range(WORKERS):
 	Worker(queue).start()
 
 if args == []:
-	file_list = glob.glob('ocean_his*.nc')
+	file_list = glob.glob(os.path.join(options.dir,'ocean_his*.nc'))
 else:
 	file_list = args
 	
@@ -123,12 +135,12 @@ else:
 			else:
 				dt1 = dt.datetime(dt0.year + 1,1,1,0,0)
 
-			cmd = './make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f image_sequence/hoodsport_salt_%s.png -a %s -b %s' % (dt0.strftime('%Y%m'),dt0.strftime('%Y%m%d%H%M'), dt1.strftime('%Y%m%d%H%M'))
+			cmd = './make_time_series.py -s 10800 -t "Salinity at Hoodsport ORCA Buoy" -v salt -f image_sequence/hoodsport_salt_%s.png -d %s -a %s -b %s' % (dt0.strftime('%Y%m'), options.dir, dt0.strftime('%Y%m%d%H%M'), dt1.strftime('%Y%m%d%H%M'))
 			print(cmd)
 			p = Popen(cmd,shell=True,stdout=PIPE)
  			sts = os.waitpid(p.pid, 0)[1]
 			
-			cmd = './make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f image_sequence/hoodsport_temp_%s.png -a %s -b %s' % (dt0.strftime('%Y%m'),dt0.strftime('%Y%m%d%H%M'), dt1.strftime('%Y%m%d%H%M'))
+			cmd = './make_time_series.py -s 10800 -t "Temperature at Hoodsport ORCA Buoy" -v temp -f image_sequence/hoodsport_temp_%s.png -d %s -a %s -b %s' % (dt0.strftime('%Y%m'), options.dir, dt0.strftime('%Y%m%d%H%M'), dt1.strftime('%Y%m%d%H%M'))
 			print(cmd)
 			p = Popen(cmd,shell=True,stdout=PIPE)
 	 		sts = os.waitpid(p.pid, 0)[1]
