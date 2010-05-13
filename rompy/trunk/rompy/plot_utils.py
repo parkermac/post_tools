@@ -481,7 +481,25 @@ def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_serie
 	
 	FigureCanvas(fig).print_png(filename)
 	
-def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='i',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None, caxis_label=None,inset='Puget Sound',label=None,label_ind=None,ctd_ind=None):
+def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',region='',n=None,x_axis_style='kilometers',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None, caxis_label=None,inset='Puget Sound',label=None,label_ind=None,ctd_ind=None,**kwargs):
+	'''
+	
+	plot_parker is a plotting routine that simplifies the plotting of ROMS curtain plots. Here's a list of what all the arguments do and what format they should be in:
+	
+	coords:		coords is a dictionary, specifically one of the return variables from one of the rompy extraction functions
+	
+	data:		data is numpy array, as returned by a rompy extraction function
+	
+	filename:	save plot as filename.
+	
+	title:		a string that will be used as the title in the plot, ignoring any definition for varname or region
+	
+	varname:	a string of for the variable being plotted. It's only use is in making the title for the plot if the title is not specified
+	
+	region:		a string of for the region being plotted. It's only use is in making the title for the plot if the title is not specified
+	
+	
+	'''
 	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 	fontsize = 8
 	
@@ -620,7 +638,6 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 		urlon = inset[3]
 	
 	
-#	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax3)
 	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution='c',ax=ax3)
 	x,y = m(*(coords['xm'],coords['ym']))
 #	pcm = m.plot(x,y,'r')

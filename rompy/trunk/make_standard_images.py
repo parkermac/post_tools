@@ -29,7 +29,7 @@ def main_basin_curtain(file,img_file,varname,n=4,clim=None): # Main Basin
 		
 		title = '%s %s Main Basin %s %s' % (extract_utils.run_title(file), os.path.basename(file), var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
 		
-		plot_utils.plot_parker(coords=coords, data=data, varname=varname, 	region='Main Basin', filename=img_file, n=n, x_axis_offset=utils.offset_region(coords), clim=clim,cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname])
+		plot_utils.plot_parker(coords=coords, data=data, varname=varname, 	region='Main Basin', filename=img_file, n=n, x_axis_offset=utils.offset_region(coords), clim=clim,cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, caxis_label=clabel_map[varname])
 	
 
 def hood_canal_curtain(file,img_file,varname,n=1,clim=None): # Hood Canal
@@ -42,7 +42,7 @@ def hood_canal_curtain(file,img_file,varname,n=1,clim=None): # Hood Canal
 		
 		title = '%s %s Hood Canal %s %s' % (extract_utils.run_title(file), os.path.basename(file), var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
 		
-		plot_utils.plot_parker(coords=coords, data=data, varname=varname, region='Hood Canal', filename=img_file, n=n,  x_axis_offset=utils.offset_region(coords), clim=clim, cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname])
+		plot_utils.plot_parker(coords=coords, data=data, varname=varname, region='Hood Canal', filename=img_file, n=n,  x_axis_offset=utils.offset_region(coords), clim=clim, cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, caxis_label=clabel_map[varname])
 
 def hood_canal_U_curtain(file,img_file,n=1,clim=None): # velocity in Hood Canal
 	x,y = utils.high_res_hood_canal_xy(n=n)
@@ -65,7 +65,7 @@ def hood_canal_U_curtain(file,img_file,n=1,clim=None): # velocity in Hood Canal
 	
 	hood_U_clim = (np.array(clim)/2.0).tolist()
 	
-	plot_utils.plot_parker(coords=coords,data=data,varname='U', region='Hood Canal', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords), cmap='red_blue', title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map['U'])
+	plot_utils.plot_parker(coords=coords,data=data,varname='U', region='Hood Canal', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords), cmap='red_blue', title=title, caxis_label=clabel_map['U'])
 
 def main_basin_U_curtain(file,img_file,n=1,clim=None): # velocity in Main Basin
 	x,y = utils.high_res_main_basin_xy(n=n)
@@ -86,7 +86,7 @@ def main_basin_U_curtain(file,img_file,n=1,clim=None): # velocity in Main Basin
 	
 	title = '%s %s Main Basin %s %s' % (extract_utils.run_title(file), os.path.basename(file), var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
 	
-	plot_utils.plot_parker(coords=coords,data=data,varname='U', region=' Main Basin', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords),cmap='red_blue', title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map['U'])
+	plot_utils.plot_parker(coords=coords,data=data,varname='U', region=' Main Basin', filename=img_file, n=n, clim=clim, x_axis_offset=utils.offset_region(coords),cmap='red_blue', title=title, caxis_label=clabel_map['U'])
 
 def daves_curtain(file,img_file,section,varname,clim=None):
 	if varname == 'U':
@@ -99,7 +99,18 @@ def daves_curtain(file,img_file,section,varname,clim=None):
 		
 		title = '%s %s %s %s %s' % (extract_utils.run_title(file), os.path.basename(file), section, var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt))
 		
-		plot_utils.plot_parker(coords=coords, data=data, varname=varname, region=section, filename=img_file, n=0,  x_axis_offset=utils.offset_region(coords), clim=clim, cmap='banas_hsv_cm',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname], inset=inset_dict[section], ctd_ind=ctd_ind_dict[section])
+		plot_utils.plot_parker(
+			coords=coords,
+			data=data,
+			filename=img_file,
+			title=title,
+			x_axis_offset=utils.offset_region(coords),
+			clim=clim,
+			cmap='banas_hsv_cm',
+			labeled_contour_gap=2,
+			caxis_label=clabel_map[varname],
+			inset=inset_dict[section],
+			ctd_ind=ctd_ind_dict[section])
 	return
 
 def daves_U_curtain(file,img_file,section,varname,clim):
@@ -122,43 +133,23 @@ def daves_U_curtain(file,img_file,section,varname,clim):
 	
 	title = '%s %s %s %s %s' % (extract_utils.run_title(file), os.path.basename(file), section, var_title_map['U'], extract_utils.file_time(file).strftime(title_time_fmt))
 
-	plot_utils.plot_parker(coords=coords, data=data, varname=varname, region=section, filename=img_file, n=0,  x_axis_offset=utils.offset_region(coords), clim=clim, cmap='red_blue',labeled_contour_gap=2, title=title, resolution=inset_coastline_resolution, caxis_label=clabel_map[varname],inset=inset_dict[section], ctd_ind=ctd_ind_dict[section])
+	plot_utils.plot_parker(
+		coords=coords,
+		data=data,
+		filename=img_file,
+		title=title,
+		x_axis_offset=utils.offset_region(coords),
+		clim=clim,
+		cmap='red_blue',
+		labeled_contour_gap=2,
+		caxis_label=clabel_map[varname],
+		inset=inset_dict[section],
+		ctd_ind=ctd_ind_dict[section])
 
 	return
 
 # begin actual code that runs.
-
 parser = OptionParser()
-
-parser.add_option('-C', '--crude',
-					dest='crude_coast',
-					action='store_true',
-					default=False,
-					help='this option will set the coastline resolution to crude')
-
-parser.add_option('-L', '--low',
-					dest='low_coast',
-					action='store_true',
-					default=False,
-					help='this option will set the coastline resolution to low')
-
-parser.add_option('-I', '--intermediate',
-					dest='int_coast',
-					action='store_true',
-					default=False,
-					help='this option will set the coastline resolution to intermediate')
-
-parser.add_option('-H', '--high',
-					dest='high_coast',
-					action='store_true',
-					default=False,
-					help='this option will set the coastline resolution to high')
-
-parser.add_option('-F', '--full',
-					dest='full_coast',
-					action='store_true',
-					default=False,
-					help='this option will set the coastline resolution to full')
 
 parser.add_option('-i', '--img_dir',
 					dest='img_dir',
@@ -193,25 +184,6 @@ ctd_ind_dict = {
 		'JdF_SoG':utils.get_daves_section_var(section='JdF_SoG',var='IOS_ctd_ind')
 		}
 ctd_ind_dict['JdF_SoG'].extend(utils.get_daves_section_var(section='JdF_SoG',var='JEMS_ctd_ind'))
-
-if options.crude_coast:
-	inset_coastline_resolution = 'c'
-	whole_domain_coastline_res = 'c'
-elif options.low_coast:
-	inset_coastline_resolution = 'l'
-	whole_domain_coastline_res = 'l'
-elif options.int_coast:
-	inset_coastline_resolution = 'i'
-	whole_domain_coastline_res = 'i'
-elif options.high_coast:
-	inset_coastline_resolution = 'h'
-	whole_domain_coastline_res = 'h'
-elif options.full_coast:
-	inset_coastline_resolution = 'f'
-	whole_domain_coastline_res = 'f'
-else:
-	inset_coastline_resolution = 'f'
-	whole_domain_coastline_res = 'f'
 
 for file in file_list:
 	ncf_index = os.path.basename(file)[:-3]
