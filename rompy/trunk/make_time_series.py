@@ -46,7 +46,8 @@ def plot_time_series(varname='salt', x=-123.1126, y=47.4218, dir='.', seconds=36
 												interval=seconds,
 												basedir=dir)
 	
-	
+	if not os.path.exist(os.path.dirname(imgfile)):
+		os.mkdirs(os.path.dirname(imgfile))
 	plot_utils.plot_time_series_profile(time,z,data,
 										filename=imgfile,
 										clim=clim_map[varname],

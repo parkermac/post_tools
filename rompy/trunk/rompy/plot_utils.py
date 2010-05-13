@@ -201,7 +201,7 @@ def plot_surface(x,y,data,filename='/Users/lederer/tmp/rompy.tmp.png'):
 	ax.grid()
 	FigureCanvas(fig).print_png(filename)
 
-def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='h',clim=None,cmap='banas_hsv_cm',title=None, caxis_label=None):
+def plot_map(lon,lat,data,filename='/Users/lederer/tmp/rompy.map.png',resolution='c',clim=None,cmap='banas_hsv_cm',title=None, caxis_label=None):
 	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 #	ax = fig.add_subplot(111)
 	longest_side_size = 24.0
@@ -486,19 +486,21 @@ def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',re
 	
 	plot_parker is a plotting routine that simplifies the plotting of ROMS curtain plots. Here's a list of what all the arguments do and what format they should be in:
 	
-	coords:		coords is a dictionary, specifically one of the return variables from one of the rompy extraction functions
+	coords:			coords is a dictionary, specifically one of the return variables from one of the rompy extraction functions
 	
-	data:		data is numpy array, as returned by a rompy extraction function
+	data:			data is numpy array, as returned by a rompy extraction function
 	
-	filename:	save plot as filename.
+	filename:		save plot as filename.
 	
-	title:		a string that will be used as the title in the plot, ignoring any definition for varname or region
+	title:			[OPTIONAL] a string that will be used as the title in the plot, ignoring any definition for varname or region
 	
-	varname:	a string of for the variable being plotted. It's only use is in making the title for the plot if the title is not specified
+	varname:		[OPTIONAL] a string of for the variable being plotted. It's only use is in making the title for the plot if the title is not specified
 	
-	region:		a string of for the region being plotted. It's only use is in making the title for the plot if the title is not specified
+	region:			[OPTIONAL] a string of for the region being plotted. It's only use is in making the title for the plot if the title is not specified
 	
+	n:				[OPTIONAL] used to to define where station carrots are placed on the plot when using the original sections
 	
+	x_axis_style:	[OPTIONAL] 
 	'''
 	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 	fontsize = 8
@@ -535,12 +537,7 @@ def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',re
 	else:
 		station_locatons = None
 	my_plot14 = ax1.plot(station_locations, 1.5*np.ones(len(station_locations)),'v',color='grey')
-
-#	if ctd_ind is not None:
-#		for ctd in ctd_ind:
-#			my_plot14 = ax1.plot(x_axis_as_km[ctd], 1.5,'v',color='grey')
-	
-	
+				
 	ax1.fill_between(x_axis_as_km,coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
 
 	ax1.set_ylim((-20,2))
@@ -578,8 +575,17 @@ def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',re
 	
 	ax1.set_ylabel('depth in meters',position=(0.05,0))
 
-	ax1.set_xticks(station_locations)
-	ax1.set_xticklabels('')
+	if label is not None and label_ind is not None:
+		if len(label) == len(label_ind):
+			label_ticks = []
+			for i in range(len(label)):
+#				ax1.text(x_axis_as_km[label_ind[i]], ax1.get_ylim()[0], label[i], horizontalalignment='center', verticalalignment='center')
+				label_ticks.append(x_axis_as_km[label_ind[i]])
+			ax1.set_xticks(label_ticks)
+			ax1.set_xticklabels(label,size=fontsize)
+	else:
+		ax1.set_xticks(station_locations)
+		ax1.set_xticklabels('')
 	
 	if x_axis_style == 'kilometers' or x_axis_style == 'kilometer':
 			td = 10 #tick_distance
@@ -628,9 +634,10 @@ def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',re
 		urlon = -122.2
 	elif inset == 'Strait of Georgia':
 		lllat = 48.0450
-		urlat = 49.3859
+		urlat = 49.4859
 		lllon = -123.6237
 		urlon = -122.5305
+
 	elif len(inset) == 4:
 		lllat = inset[0]
 		lllon = inset[1]
@@ -642,14 +649,21 @@ def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',re
 	x,y = m(*(coords['xm'],coords['ym']))
 #	pcm = m.plot(x,y,'r')
 	if inset == 'Puget Sound':
-		coast_lon, coast_lat = m(*(utils.get_coastline('detailed')))
+		coast_lon, coast_lat = utils.get_coastline('detailed')
 	elif inset == 'Strait of Georgia':
-		coast_lon, coast_lat = m(*(utils.get_coastline('regional')))
-#	print(coast_lat)
-#	print(coast_lon)
+		coast_lon, coast_lat = utils.get_coastline('regional')
+# This is a kludge to deal with a bug in matplotlib when plotting a subset of the regional coastline
+#		coast_lat[coast_lat<lllat] = np.nan
+		coast_lat[coast_lat>urlat] = np.nan
+	
+#		coast_lon[coast_lon<lllon] = np.nan
+#		coast_lon[coast_lon>urlon] = np.nan
+	
+	coast_lon_proj,coast_lat_proj = m(*(coast_lon,coast_lat))
+	
 #	m.drawcoastlines(linewidth=0.5)
 #	m.fillcontinents(color='#ECECEC')
-	m.plot(coast_lon,coast_lat,'k',linewidth=0.5)
+	m.plot(coast_lon_proj,coast_lat_proj,'k',linewidth=0.5)
 	pcm1 = m.plot(x,y,'r',linewidth=0.5)
 	if n > 0:
 		pcm2 = m.plot(x[0:-1:n],y[0:-1:n],'.k')

@@ -17,7 +17,7 @@ def surface_map(file,img_file=None,varname='salt',clim=None):
 	
 	
 	title = '%s %s %s %s' % ( extract_utils.run_title(file), os.path.basename(file), var_title_map[var], extract_utils.file_time(file).strftime(title_time_fmt) )
-	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename=img_file, clim=clim, title=title, resolution=whole_domain_coastline_res, caxis_label=clabel_map[varname])
+	plot_utils.plot_map(coords['xm'],coords['ym'],data,filename=img_file, clim=clim, title=title, caxis_label=clabel_map[varname])
 
 def main_basin_curtain(file,img_file,varname,n=4,clim=None): # Main Basin
 	if varname == 'U':
@@ -110,7 +110,10 @@ def daves_curtain(file,img_file,section,varname,clim=None):
 			labeled_contour_gap=2,
 			caxis_label=clabel_map[varname],
 			inset=inset_dict[section],
-			ctd_ind=ctd_ind_dict[section])
+			ctd_ind=ctd_ind_dict[section],
+			label=utils.get_daves_section_var(section=section,var='label'),
+			label_ind=utils.get_daves_section_var(section=section,var='label_ind')
+			)
 	return
 
 def daves_U_curtain(file,img_file,section,varname,clim):
@@ -144,7 +147,10 @@ def daves_U_curtain(file,img_file,section,varname,clim):
 		labeled_contour_gap=2,
 		caxis_label=clabel_map[varname],
 		inset=inset_dict[section],
-		ctd_ind=ctd_ind_dict[section])
+		ctd_ind=ctd_ind_dict[section],
+		label=utils.get_daves_section_var(section=section,var='label'),
+		label_ind=utils.get_daves_section_var(section=section,var='label_ind')
+		)
 
 	return
 
