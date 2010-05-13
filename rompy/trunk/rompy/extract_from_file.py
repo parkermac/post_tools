@@ -7,7 +7,7 @@ import load_grid
 #import plot_utils
 import utils
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 def extract_from_file(file='',varname='zeta',extraction_type='full',**kwargs):
 	# Check the netCDF file for existence and if the variable is in it

@@ -4,7 +4,7 @@ import netCDF4 as nc
 import numpy as np
 #from scipy.interpolate.fitpack2 import  SmoothBivariateSpline
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 def load_grid(files):
 	'''

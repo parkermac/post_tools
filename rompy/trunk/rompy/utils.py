@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib.mlab import griddata
 import netCDF4 as nc
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 def interp_2d_latlon(lat,lon,data,lati,loni):
 	return griddata(lat.reshape(lat.size),lon.reshape(lon.size),data.reshape(data.size),lati,loni)

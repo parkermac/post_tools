@@ -7,7 +7,7 @@ import pytz
 import numpy as np
 import netCDF4 as nc
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 def file_time(f):
 	UTC = pytz.timezone('UTC')

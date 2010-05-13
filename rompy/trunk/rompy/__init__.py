@@ -6,7 +6,7 @@ __all__ = [	'extract_from_file',
 			'rompy',
 			'utils']
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 import extract_from_file
 import extract_from_series
