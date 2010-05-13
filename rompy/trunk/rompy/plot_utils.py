@@ -481,7 +481,7 @@ def plot_time_series_profile(t,z,d,filename='/Users/lederer/tmp/rompy.time_serie
 	
 	FigureCanvas(fig).print_png(filename)
 	
-def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='i',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None, caxis_label=None):
+def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/lederer/tmp/rompy.mickett.png',n=1,x_axis_style='kilometers',resolution='i',x_axis_offset=0,clim=None,cmap=None,labeled_contour_gap=None, caxis_label=None,inset='Puget Sound',label=None,label_ind=None,ctd_ind=None):
 	fig = Figure(facecolor='white',figsize=(12.0,9.0))
 	fontsize = 8
 	
@@ -493,8 +493,7 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 	cax = fig.add_axes([0.84, 0.1, 0.02, 0.4],frameon=False) # subplot for the color axis
 	
 	x_axis_as_km = utils.coords_to_km(coords)
-	station_locations = x_axis_as_km[0:-1:n]
-
+	
 	my_plot11 = ax1.contourf(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,norm=norm,cmap=cmap)
 	my_plot12 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,100,linewidths=1,linestyle=None,norm=norm,cmap=cmap)
 	
@@ -509,8 +508,20 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 		my_plot13 = ax1.contour(np.tile(x_axis_as_km,(coords['zm'].shape[0],1)),coords['zm'],data,solid_contours,colors='k',linewidths=0.5)
 		ax1.clabel(my_plot13,inline=True,fmt=contour_label_fmt,fontsize=fontsize)
 
-
+	if n > 0:
+		station_locations = x_axis_as_km[0:-1:n]
+	elif ctd_ind is not None:
+		station_locations = []
+		for ctd in ctd_ind:
+			station_locations.append(x_axis_as_km[ctd])
+	else:
+		station_locatons = None
 	my_plot14 = ax1.plot(station_locations, 1.5*np.ones(len(station_locations)),'v',color='grey')
+
+#	if ctd_ind is not None:
+#		for ctd in ctd_ind:
+#			my_plot14 = ax1.plot(x_axis_as_km[ctd], 1.5,'v',color='grey')
+	
 	
 	ax1.fill_between(x_axis_as_km,coords['zm'][0,:],ax1.get_ylim()[0],color='grey')
 
@@ -548,6 +559,7 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 		ax1.set_title(title)
 	
 	ax1.set_ylabel('depth in meters',position=(0.05,0))
+
 	ax1.set_xticks(station_locations)
 	ax1.set_xticklabels('')
 	
@@ -591,24 +603,42 @@ def plot_parker(coords,data,varname='',title=None,region='',filename='/Users/led
 #	urlon = np.max(coords['xm'])
 	
 #	lat lon values for the inset map show a close-up of the Puget Sound
-	lllat = 47.0
-	urlat = 48.5
-	lllon = -123.3
-	urlon = -122.2
+	if inset == 'Puget Sound':
+		lllat = 47.0
+		urlat = 48.5
+		lllon = -123.3
+		urlon = -122.2
+	elif inset == 'Strait of Georgia':
+		lllat = 48.0450
+		urlat = 49.3859
+		lllon = -123.6237
+		urlon = -122.5305
+	elif len(inset) == 4:
+		lllat = inset[0]
+		lllon = inset[1]
+		urlat = inset[2]
+		urlon = inset[3]
 	
 	
 #	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution=resolution,ax=ax3)
 	m = Basemap(projection='merc',llcrnrlat=lllat,urcrnrlat=urlat,llcrnrlon=lllon,urcrnrlon=urlon,resolution='c',ax=ax3)
 	x,y = m(*(coords['xm'],coords['ym']))
 #	pcm = m.plot(x,y,'r')
-	coast_lon, coast_lat = m(*(utils.get_coastline('detailed')))
+	if inset == 'Puget Sound':
+		coast_lon, coast_lat = m(*(utils.get_coastline('detailed')))
+	elif inset == 'Strait of Georgia':
+		coast_lon, coast_lat = m(*(utils.get_coastline('regional')))
 #	print(coast_lat)
 #	print(coast_lon)
 #	m.drawcoastlines(linewidth=0.5)
 #	m.fillcontinents(color='#ECECEC')
 	m.plot(coast_lon,coast_lat,'k',linewidth=0.5)
 	pcm1 = m.plot(x,y,'r',linewidth=0.5)
-	pcm2 = m.plot(x[0:-1:n],y[0:-1:n],'.k')
+	if n > 0:
+		pcm2 = m.plot(x[0:-1:n],y[0:-1:n],'.k')
+	if ctd_ind is not None:
+		for ctd in ctd_ind:
+			pcm2 = m.plot(x[ctd],y[ctd],'.k')
 	
 	FigureCanvas(fig).print_png(filename)
 	
