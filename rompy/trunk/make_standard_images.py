@@ -122,7 +122,6 @@ def daves_U_curtain(file,img_file,section,varname,clim):
 	(u, coords) = rompy.extract(file,varname='u',extraction_type='profile',x=x,y=y)
 	(v, coords) = rompy.extract(file,varname='v',extraction_type='profile',x=x,y=y)
 	data = np.zeros(u.shape)
-
 	for i in range(u.shape[1]):
 		if i == u.shape[1]-1:
 			x_vec = np.array([x[i] - x[i-1], y[i] - y[i-1]])
@@ -144,7 +143,6 @@ def daves_U_curtain(file,img_file,section,varname,clim):
 		x_axis_offset=utils.offset_region(coords),
 		clim=clim,
 		cmap='red_blue',
-		labeled_contour_gap=2,
 		caxis_label=clabel_map[varname],
 		inset=inset_dict[section],
 		ctd_ind=ctd_ind_dict[section],
@@ -182,12 +180,14 @@ clims = {'salt':[0, 21,33, 33], 'temp': [8, 20], 'U':[-2,2]}
 
 clabel_map = {'temp': u'\u00B0 C', 'salt': 'psu', 'U': 'm/s'}
 
-inset_dict = {'AI_HC':'Puget Sound','AI_WB':'Puget Sound','JdF_SoG':'Strait of Georgia'}
+inset_dict = {'AI_HC':'Puget Sound','AI_WB':'Puget Sound','JdF_SoG':'Strait of Georgia','JdF_SS':'Puget Sound','JdF_PS':'JdF_PS'}
 
 ctd_ind_dict = {
 		'AI_HC':utils.get_daves_section_var(section='AI_HC',var='PRISM_ctd_ind'),
 		'AI_WB':utils.get_daves_section_var(section='AI_WB',var='PRISM_ctd_ind'),
-		'JdF_SoG':utils.get_daves_section_var(section='JdF_SoG',var='IOS_ctd_ind')
+		'JdF_SoG':utils.get_daves_section_var(section='JdF_SoG',var='IOS_ctd_ind'),
+		'JdF_SS':utils.get_daves_section_var(section='JdF_SS',var='PRISM_ctd_ind'),
+		'JdF_PS':utils.get_daves_section_var(section='JdF_PS',var='PRISM_ctd_ind')
 		}
 ctd_ind_dict['JdF_SoG'].extend(utils.get_daves_section_var(section='JdF_SoG',var='JEMS_ctd_ind'))
 
@@ -204,6 +204,8 @@ for file in file_list:
 		AI_HC_img_file = '%s/AI_HC_%s_%s.png' %(img_dir,var,ncf_index)
 		AI_WB_img_file = '%s/AI_WB_%s_%s.png' %(img_dir,var,ncf_index)
 		JdF_SoG_img_file = '%s/JdF_SoG_%s_%s.png' %(img_dir,var,ncf_index)
+		JdF_SS_img_file = '%s/JdF_SS_%s_%s.png' %(img_dir,var,ncf_index)
+		JdF_PS_img_file = '%s/JdF_PS_%s_%s.png' %(img_dir,var,ncf_index)
 		
 		print('making hood canal %s' % var)
 		hood_canal_curtain(file, hood_img_file, var, n=8, clim=clims[var])
@@ -219,7 +221,12 @@ for file in file_list:
 		print('making JdF_SoG %s' % var)
 		daves_curtain(file,JdF_SoG_img_file,section='JdF_SoG',varname=var,clim=clims[var])
 		
+		print('making JdF_SS %s' % var)
+		daves_curtain(file,JdF_SS_img_file,section='JdF_SS',varname=var,clim=clims[var])
 		
+		print('making JdF_PS %s' % var)
+		daves_curtain(file,JdF_PS_img_file,section='JdF_PS',varname=var,clim=clims[var])
+
 		if not var == 'U':
 			print('making surface %s' % var)
 			surface_map(file,surface_img_file,var,clim=clims[var])

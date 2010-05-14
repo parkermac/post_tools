@@ -637,7 +637,11 @@ def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',re
 		urlat = 49.4859
 		lllon = -123.6237
 		urlon = -122.5305
-
+	elif inset == 'JdF_PS':
+		lllat = 46.0
+		urlat = 49.0
+		lllon = -124.9
+		urlon = -122.2
 	elif len(inset) == 4:
 		lllat = inset[0]
 		lllon = inset[1]
@@ -650,7 +654,7 @@ def plot_parker(coords,data,filename='rompy.parker.png',title=None,varname='',re
 #	pcm = m.plot(x,y,'r')
 	if inset == 'Puget Sound':
 		coast_lon, coast_lat = utils.get_coastline('detailed')
-	elif inset == 'Strait of Georgia':
+	elif inset == 'Strait of Georgia' or inset == 'JdF_PS':
 		coast_lon, coast_lat = utils.get_coastline('regional')
 # This is a kludge to deal with a bug in matplotlib when plotting a subset of the regional coastline
 #		coast_lat[coast_lat<lllat] = np.nan
