@@ -1,10 +1,10 @@
 function [dist, distFrom]=trackDistnew(varargin)
-%              ...x,y,xTrack,yTrack
+% [dist, distFrom]=trackDistnew(x,y,xTrack,yTrack);
 %            ...x,y,track
 %            ...EX,track
 %           ...EX,xTrack,yTrack
-
-%if x or y has nans, dist and distFrom will have nans in those locations
+%
+% if x or y has nans, dist and distFrom will have nans in those locations
 
 
 if nargin==2
