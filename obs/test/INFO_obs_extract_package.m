@@ -18,9 +18,9 @@ obs_seperateCasts - seperates data from a given cast into multiple seperate stru
 obs_merge - merges multiple data structures into one structure, 1-D data only
 obs_omit - find and deletes data in structure  from all fields  where criterion is met
     works with both 1-D and 2-D
-trackDistnew - calculates distance in KM along a trackline as well as 
+utility/trackDist - calculates distance in KM along a trackline as well as 
     closest point on a trackline to point off the line
-dirwalker - searches through specified folder for all netcdf files nested within folder
+utility/dirwalker - searches through specified folder for all netcdf files nested within folder
 
 
  HCthalweg.mat - Hood Canal Thalweg

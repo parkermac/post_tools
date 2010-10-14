@@ -1,1 +1,121 @@
-function [d,xyproj] = trackdist(xy,xytr,iorig,llorxy);% [d,xyproj] = trackdist(xy,xytr);%                            ..., iorig);%                                   ..., 'll' | 'xy');%% interpolates distances along the track _xytr_ for the points _xy_.% handles points off the ends of the track okay.% coords are given like [x1 y1; x2 y2; ...].% Uses xytr(iorig,:) as the origin. Default is 1.% if last argument is 'll', interprets as lat-long coords in degrees. Default% is 'll'.% d is distances in km.% xyproj is a vector of points projected along the track.%% algorithm:% for a point in xy (x0,y0) and a segment of xytr (x1,y1)-(x2,y2),% define an index along the segment which is 0 at (x1,y1) and 1 at (x2,y2).% the value of the index that minimizes dist^2 from (x0,y0) to the line is% 		p = ((x2-x1)(x0-x1)+(y2-y1)(y0-y1))/((x2-x1)^2+(y2-y1)^2).% if p is between 0 and 1, the point of closest approach to that segment can% be interpolated; if p < 0, it's (x1,y1); if p > 1, it's (x2,y2). Call this% point (xhat,yhat); calculate the distance from (x0,y0) to this point on each% segment. Now just find the minimum for the whole track, and find the cumsum% distance along the track up to the appropriate (xhat,yhat).% if the overall point of closest approach is the 1st or last point on the% track, then adds or subtracts linear dist to that endpoint (as if (x0,y0) were an% additional track point).%% neil banas 2002if nargin == 3	if isstr(iorig), llorxy = iorig; iorig = 1; else, llorxy = 'll'; endelseif nargin == 2	iorig = 1; llorxy = 'll';endif size(xy,1)==2 & size(xy,2)~=2, xy = xy'; endif size(xytr,1)==2 & size(xytr,2)~=2, xytr = xytr'; endif strcmpi(llorxy,'ll')	llorig = mean(xytr);	xy = ll2cart(xy,llorig);	xytr = ll2cart(xytr,llorig);enddx = diff(xytr(:,1));	% these are vectors the length of the # of segmentsdy = diff(xytr(:,2));	% in xytrD2dxdy = dx.^2+dy.^2;Dseg = sqrt(D2dxdy);x1 = xytr(1:end-1,1);y1 = xytr(1:end-1,2);x2 = xytr(2:end,1);y2 = xytr(2:end,2);for i = 1:size(xy,1)	% for each (x0,y0)	p = (dx.*(xy(i,1)-x1)+dy.*(xy(i,2)-y1))./D2dxdy;	p(find(p<0)) = 0;	p(find(p>1)) = 1;	xhat = (1-p).*x1+p.*x2;	% point of closest approach on each seg	yhat = (1-p).*y1+p.*y2;	D2 = (xhat-xy(i,1)).^2+(yhat-xy(i,2)).^2;	% min dist for each seg	f = find(D2==min(D2)); % best seg	f = f(1);	dist(i) = sum(Dseg(1:f-1)) + p(f).*Dseg(f);	%cumulative dist along track	xyproj(i,:) = [xhat(f) yhat(f)];	if f==1 & p(f)==0	% if before the start of the track		dist(i) = dist(i) - sqrt((xy(i,1)-xytr(1,1)).^2+(xy(i,2)-xytr(1,2)).^2);		xyproj(i,:) = xy(i,:);	elseif f==length(Dseg) & p(f)==1	% if after the end of the track		dist(i) = dist(i) + sqrt((xy(i,1)-xytr(end,1)).^2+(xy(i,2)-xytr(end,2)).^2);		xyproj(i,:) = xy(i,:);	endendd = dist - sum(Dseg(1:iorig-1));	% subtract off distance to assigned origin pointif strcmpi(llorxy,'ll')	xyproj = cart2ll(xyproj,llorig);end
+function [dist, distFrom]=trackDist(varargin)
+% [dist, distFrom]=trackDist(x,y,xTrack,yTrack);
+%                         ...x,y,track);
+%                         ...EX,track);
+%                         ...EX,xTrack,yTrack);
+%
+% returns distance along and distance from a trackline.
+% if x or y has nans, dist and distFrom will have nans in those locations
+
+
+if nargin==2
+    Ex=varargin{1};
+    x=Ex.x;
+    y=Ex.y;
+    track=varargin{2};
+    xTrack=track.x;
+    yTrack=track.y;
+    
+elseif nargin==4
+    x=varargin{1};
+    y=varargin{2};
+     xTrack=varargin{3};
+    yTrack=varargin{4};
+    
+elseif nargin==3
+    if isstruct(varargin{1})==1
+        Ex=varargin{1};
+    x=Ex.x;
+    y=Ex.y;
+    xTrack=varargin{2};
+    yTrack=varargin{3};
+    else
+    x=varargin{1};
+    y=varargin{2};
+    track=varargin{3};
+    xTrack=track.x;
+    yTrack=track.y;
+    end
+    
+
+end
+
+%% check that track points do not have nans or bad points, if so, delete points and return a warning
+badtrack=find(isnan(xTrack)==1 |isnan(yTrack)==1);
+if isempty(badtrack)==0
+xTrack(badtrack)=[];
+yTrack(badtrack)=[];
+warning('Section has nan data points, these section points will not be used in determining distance along track')
+end
+
+%% change to x y coordinate space
+
+lat=y*111.325;
+lon=cosd(mean(yTrack))*111.325.*x;
+
+
+
+tlat=yTrack*111.325;
+tlon=cosd(mean(yTrack))*111.325.*xTrack;
+%% special case where only 1 track point is given, return dist=0 and distFrom=?
+if length(tlon)==1
+
+distFrom=sqrt((tlon-lon).^2+(tlat-lat).^2);
+dist=zeros(length(lon),1);
+return
+
+end
+
+%%
+
+%first find distance between segments if not there
+if exist('track.dist','var')==0
+    TrackDistance=zeros(length(tlon),1);
+    for k=1:length(tlon)-1;
+    TrackDistance(k+1)=sqrt((tlon(k)-tlon(k+1)).^2+(tlat(k)-tlat(k+1)).^2);
+    end
+    Tdist=cumsum(TrackDistance);
+else
+    Tdist=track.dist;
+end
+%%
+
+Tdist_point=nan(length(lon),1);
+MinDistance=nan(length(lon),1);
+    %put 99999 in places where lon or lat is currently nan and replace at the
+    %end with nans
+
+    nanlonlat=find(isnan(lon)==1 | isnan(lat)==1);
+    Tdist_point(nanlonlat)=9999;
+    MinDistance(nanlonlat)=9999;
+q=1;
+while q>0
+
+    
+
+    if MinDistance(q)~=9999
+    distToPoint=sqrt((tlon-lon(q)).^2+(tlat-lat(q)).^2);
+    [D,I]=min(distToPoint);
+ 
+
+    pl=find(lon==lon(q) & lat==lat(q));
+    
+    MinDistance(pl,1)=D(1) ;
+    
+    Tdist_point(pl)=Tdist(I(1));
+    end
+    
+     nanfind=find(isnan(MinDistance(:,1))==1,1);
+    
+          if isempty(nanfind)==0
+            q=nanfind(1);
+          else q=0;
+          end
+          
+end
+Tdist_point(nanlonlat)=nan;
+MinDistance(nanlonlat)=nan;
+dist=Tdist_point;
+distFrom=MinDistance(:,1);
+
+%%

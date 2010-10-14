@@ -99,7 +99,7 @@ function EX = obs_extractFromFile(filename, vars, timerange,varargin)
                     switch varargin{1}
                         case 'section'  % section, trackline type
                             if length(varargin{3})>1
-                             [dist, distFrom]=trackDistnew(longitude(TimeInFile),latitude(TimeInFile), varargin{2},varargin{3});
+                             [dist, distFrom]=trackDist(longitude(TimeInFile),latitude(TimeInFile), varargin{2},varargin{3});
                              includedata=find(distFrom<=varargin{4});
                                 if ~isempty(includedata)
                             EX.dist=dist(includedata);
@@ -111,7 +111,7 @@ function EX = obs_extractFromFile(filename, vars, timerange,varargin)
                               inpoly=inpolygon(longitude(TimeInFile), latitude(TimeInFile), ring(:,1), ring(:,2));
                                includedata=find(inpoly==1);
                                 if ~isempty(includedata)
-                                 [dist, distFrom]=trackDistnew(longitude(TimeInFile(includedata)),latitude(TimeInFile(includedata)), varargin{2},varargin{3});
+                                 [dist, distFrom]=trackDist(longitude(TimeInFile(includedata)),latitude(TimeInFile(includedata)), varargin{2},varargin{3});
                              EX.dist=dist;
                              EX.distFrom=distFrom;
                                 end

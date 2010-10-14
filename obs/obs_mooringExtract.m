@@ -96,7 +96,7 @@ elseif exist(filename, 'file')==2
     switch varargin{1}
         case 'section'  % section, trackline type
             if length(varargin{3})>1
-                [dist, distFrom]=trackDistnew(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
+                [dist, distFrom]=trackDist(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
                 if distFrom<=varargin{4};
                     includedata=1;
                     EX2D.dist=dist*ones(size(longitude));
@@ -110,7 +110,7 @@ elseif exist(filename, 'file')==2
                 inpoly=inpolygon(longitude(1,1), latitude(1,1), ring(:,1), ring(:,2));
                 if inpoly==1
                     includedata=1;
-                    [dist, distFrom]=trackDistnew(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
+                    [dist, distFrom]=trackDist(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
                     EX2D.dist=dist*ones(size(longitude));
                     EX2D.distFrom=distFrom*ones(size(longitude));
                 else
