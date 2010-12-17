@@ -1,8 +1,3 @@
-* keep track of the file each data point is taken from.
-
-	[extraction, filenames] = obs_extract(...
-	extraction has a new field, .fileid, which is an integer index into
-	_filenames_, a cell array of the files that data was found in
 
 * correspondingly,
     the files in the master data archive should all be given a string variable
@@ -10,9 +5,3 @@
     (someone who can answer methodology questions and either give permission 
     to use the data in a paper, or forward a request to someone who can)
     
-* obs_extract.m should take the syntax
-
-	...,'section', track, range);
-	where _track_ is a structure with fields .x and .y.
-	if a field .dist is also found in _track_, then this is used instead of
-	what comes out of trackDist (a convenient way of shifting the origin).
