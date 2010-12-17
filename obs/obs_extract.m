@@ -1,13 +1,15 @@
 
 
-function data = obs_extract(files, vars, timeRange, varargin)
+function [data, filenames] = obs_extract(files, vars, timeRange, varargin)
 %------------------------------------------------------------
-% data = obs_extract(filename, vars, timeRange
+% [data, filenames] = obs_extract(filename, vars, timeRange
 %                                         ..., 'section',x,y,range);
+%                                           ...,'section',track,range)
+%                                         ..., 'point',x,y);
 %                                         ..., 'polygon',x,y);
 %                                         ..., 'all');
-% data = obs_extract(directory, ...
-% data = obs_extract(cell array of files and directories, ...
+%[data, filenames] = obs_extract(directory, ...
+% [data, filenames] = obs_extract(cell array of files and directories, ...
 %
 % looks inside a netcdf file for one or more observational variables and
 % returns them in a structure _data_, along with coordinate variables.
@@ -26,6 +28,12 @@ function data = obs_extract(files, vars, timeRange, varargin)
 %
 % written by C. Bassin ,D. Sutherland and N. Banas, UW, Jan 2010
 %
+% edited Dec 2010 by C. Bassin:
+% added filenames and data.fileid as an output.
+%   filenames shows files with correct dimension size that were searched 
+%   data.fileid gives an integer value that is associated to filenames cell
+%   aray to show which file the data originated
+
 %------------------------------------------------------------
 
 
@@ -58,6 +66,8 @@ for j=1:N;
   disp(['reading data from ' new_netcdfpaths{j}])
 
   dataC{j,1}= obs_extractFromFile(new_netcdfpaths{j}, vars, timeRange, varargin{:});
+    dataC{j,1}.fileid=ones(size(dataC{j,1}.z))*j;  % puts a fileid in extracted data
+  
 end 
 
 if N>1
@@ -76,7 +86,7 @@ data=obs_omit(data,'t == nan');
 
 data.cast=obs_identifyCasts(data);
 
-
+filenames=new_netcdfpaths';
 
 end
 

@@ -1,9 +1,10 @@
 function EX = obs_extractFromFile(filename, vars, timerange,varargin)
 %                                                ...,'section',x,y,range)
-%                                              
+%                                               ...,'section',track,range)
+%                                                 ..., 'point',x,y);
 %                                                  ...,'polygon',x,y)
 %                                                    ...,'all')    
-                                
+%edited C. Bassin Dec 2010                                  
 %%
 
 % if (nargin~=7 ||nargin~=6|| nargin~=4)
@@ -98,15 +99,24 @@ function EX = obs_extractFromFile(filename, vars, timerange,varargin)
                      %which type of geography?
                     switch varargin{1}
                         case 'section'  % section, trackline type
-                            if length(varargin{3})>1
+                            if isstruct(varargin{2})
+                              [dist, distFrom]=trackDist(longitude(TimeInFile),latitude(TimeInFile), varargin{2});   
+                               includedata=find(distFrom<=varargin{3});
+                                if ~isempty(includedata)
+                                 EX.dist=dist(includedata);
+                                 EX.distFrom=distFrom(includedata);
+                                end
+                            else
                              [dist, distFrom]=trackDist(longitude(TimeInFile),latitude(TimeInFile), varargin{2},varargin{3});
                              includedata=find(distFrom<=varargin{4});
                                 if ~isempty(includedata)
-                            EX.dist=dist(includedata);
-                             EX.distFrom=distFrom(includedata);
+                                 EX.dist=dist(includedata);
+                                 EX.distFrom=distFrom(includedata);
                                 end
-                            %for one location  only:
-                            else
+                            end
+                         
+                        case 'point'  % for one location  only:
+                            
                                ring=make_range_ring(varargin{2}, varargin{3}, varargin{4});%lon,;lat,,range
                               inpoly=inpolygon(longitude(TimeInFile), latitude(TimeInFile), ring(:,1), ring(:,2));
                                includedata=find(inpoly==1);
@@ -115,14 +125,13 @@ function EX = obs_extractFromFile(filename, vars, timerange,varargin)
                              EX.dist=dist;
                              EX.distFrom=distFrom;
                                 end
-                            end
-                            
+                                                    
                      
                          case 'polygon' % polygon
                              inpoly=inpolygon(longitude(TimeInFile), latitude(TimeInFile), varargin{2}, varargin{3});
                              includedata=find(inpoly==1);
                                 
-                        case  'all' % all
+                         case  'all' % all
                               includedata=1:length(TimeInFile); 
                             
                     end % end switch case type geography

@@ -12,6 +12,7 @@ with nans added as necessary.
 currently only works with call of type='any'
 %}
 %C. Bassin amd N. Banas Jan 2010
+%Edited to delete .fileid from merged files C. Bassin Dec 2010 
 
 
 if ischar(varargin{end})~=1    
@@ -44,15 +45,15 @@ switch type
             
             for k=1:length(AllF);
                  w=[];
-             for j=1:length(interiordata);
-                    sizeoffield=length(interiordata{j}.x);
-                 if isfield(interiordata{j},AllF{k});
-                     GF=getfield(interiordata{j},AllF{k});
-                     w=[w;GF];
-                 else
-                    w=[w;nan(sizeoffield,1)]; 
+                 for j=1:length(interiordata);
+                        sizeoffield=length(interiordata{j}.x);
+                     if isfield(interiordata{j},AllF{k});
+                         GF=getfield(interiordata{j},AllF{k});
+                         w=[w;GF];
+                     else
+                        w=[w;nan(sizeoffield,1)]; 
+                     end
                  end
-             end
                  EXM.(AllF{k})=w;
                        
             end
@@ -70,7 +71,12 @@ switch type
         EXM = obs_merge(varargin{:});
 end
 
+%get rid of fileid as it doesnt change when merged and cause incorrect
+%information
 
+if isfield(EXM,'fileid')
+ EXM = rmfield(EXM, 'fileid');
+end
 
 
 end
