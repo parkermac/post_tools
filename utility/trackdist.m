@@ -69,14 +69,25 @@ end
 %%
 
 %first find distance between segments if not there
-if exist('track.dist','var')==0
-    TrackDistance=zeros(length(tlon),1);
-    for k=1:length(tlon)-1;
-    TrackDistance(k+1)=sqrt((tlon(k)-tlon(k+1)).^2+(tlat(k)-tlat(k+1)).^2);
-    end
-    Tdist=cumsum(TrackDistance);
-else
+if exist('track','var')==1  
+    if  isfield(track, 'dist')
     Tdist=track.dist;
+    else
+    TrackDistance=zeros(length(tlon),1);
+        for k=1:length(tlon)-1;
+        TrackDistance(k+1)=sqrt((tlon(k)-tlon(k+1)).^2+(tlat(k)-tlat(k+1)).^2);
+        end
+        Tdist=cumsum(TrackDistance); 
+    end
+    
+else   
+    TrackDistance=zeros(length(tlon),1);
+        for k=1:length(tlon)-1;
+        TrackDistance(k+1)=sqrt((tlon(k)-tlon(k+1)).^2+(tlat(k)-tlat(k+1)).^2);
+        end
+        Tdist=cumsum(TrackDistance);
+
+   
 end
 %%
 
