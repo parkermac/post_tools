@@ -76,7 +76,7 @@ if N>1
 else
     data= dataC{1,1};
 end
-data = rmfield(data, 'filem')
+data = rmfield(data, 'filem');
 
 % get rid of nan data in coordinate variables
 data=obs_omit(data,'x == nan');
