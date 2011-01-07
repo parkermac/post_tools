@@ -73,10 +73,12 @@ end
 
 %get rid of fileid as it doesnt change when merged and cause incorrect
 %information
-
-if isfield(EXM,'fileid')
- EXM = rmfield(EXM, 'fileid');
+if ~isfield(EXM,'filem')
+    if isfield(EXM,'fileid')
+    EXM = rmfield(EXM, 'fileid');
+    end
 end
+
 
 
 end

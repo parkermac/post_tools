@@ -67,7 +67,7 @@ for j=1:N;
 
   dataC{j,1}= obs_extractFromFile(new_netcdfpaths{j}, vars, timeRange, varargin{:});
     dataC{j,1}.fileid=ones(size(dataC{j,1}.z))*j;  % puts a fileid in extracted data
-  
+  dataC{j,1}.filem=1;% create an id to tell obs merge not to get rid of fileid
 end 
 
 if N>1
@@ -76,6 +76,7 @@ if N>1
 else
     data= dataC{1,1};
 end
+data = rmfield(data, 'filem')
 
 % get rid of nan data in coordinate variables
 data=obs_omit(data,'x == nan');
