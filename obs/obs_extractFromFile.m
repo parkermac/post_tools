@@ -117,7 +117,7 @@ function EX = obs_extractFromFile(filename, vars, timerange,varargin)
                          
                         case 'point'  % for one location  only:
                             
-                               ring=make_range_ring(varargin{2}, varargin{3}, 1);%lon,;lat,,range
+                               ring=make_range_ring(varargin{2}, varargin{3}, .1);%lon,;lat,,range
                               inpoly=inpolygon(longitude(TimeInFile), latitude(TimeInFile), ring(:,1), ring(:,2));
                                includedata=find(inpoly==1);
                                 if ~isempty(includedata)
