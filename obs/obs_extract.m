@@ -24,7 +24,7 @@ function [data, filenames] = obs_extract(files, vars, timeRange, varargin)
 %
 % timeRange is a 2 element vector of matlab datenums or 'all'.
 %
-
+% if 'point' is used, it looks for data within 1 km of that location 
 %
 % written by C. Bassin ,D. Sutherland and N. Banas, UW, Jan 2010
 %
