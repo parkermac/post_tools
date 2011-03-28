@@ -99,8 +99,8 @@ elseif exist(filename, 'file')==2
                 [dist, distFrom]=trackDist(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
                 if distFrom<=varargin{4};
                     includedata=1;
-                    EX2D.dist=dist*ones(size(longitude));
-                    EX2D.distFrom=distFrom*ones(size(longitude));
+                     dist1=dist*ones(size(longitude));
+                    distFrom1=distFrom*ones(size(longitude));
                 else
                     includedata=0;
                 end
@@ -111,8 +111,8 @@ elseif exist(filename, 'file')==2
                 if inpoly==1
                     includedata=1;
                     [dist, distFrom]=trackDist(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
-                    EX2D.dist=dist*ones(size(longitude));
-                    EX2D.distFrom=distFrom*ones(size(longitude));
+                    dist1=dist*ones(size(longitude));
+                     distFrom1=distFrom*ones(size(longitude));
                 else
                     includedata=0;
                 end
@@ -161,22 +161,26 @@ elseif exist(filename, 'file')==2
     %% now get  requested variables
  %% get general variables
     % lat, lon and time alread downloaded above
-    EX2D.x=longitude(:,TimeInFile);
-    EX2D.y=latitude(:,TimeInFile);
-    EX2D.t=eT(:,TimeInFile);
+    EX2D.x=longitude(TimeInFile,:);
+    EX2D.y=latitude(TimeInFile,:);
+    EX2D.t=eT(TimeInFile,:);
     EX2D.tvec=T(TimeInFile);
+     EX2D.dist=dist1(TimeInFile,:);
+      EX2D.distFrom=distFrom1(TimeInFile,:);
     % use var_EX2Dist to get only variables found in the file
 
     if ischar(vars)==1;  % if only one variable was given
         temp_variable=nc_varget(filename,vars);
-        EX2D.(vars)=temp_variable(:,TimeInFile);
+        EX2D.(vars)=temp_variable(TimeInFile,:);
         clear temp_variable
     elseif iscell(vars)==1 % if a cell of variables was given
         for K=1:length(var_exist);
             if var_exist(K)==1
                 temp_variable=nc_varget(filename,vars{K});
-                EX2D.(vars{K})=temp_variable(:,TimeInFile);
+                if min(size(temp_variable))>1
+                EX2D.(vars{K})=temp_variable(TimeInFile,:);
                 clear temp_variable
+                end
             else
                 EX2D.(vars{K})=nan(size(EX2D.t));
                 %warning([vars{K} 'does not EX2Dist in' filename])
@@ -193,14 +197,14 @@ elseif exist(filename, 'file')==2
         temp_variable=nc_varget(filename,'pressure');
          EX2D.zvec=temp_variable;
          EX2D.z=ones(size(EX2D.t));
-         for Z=1:size(EX2D.t,2);EX2D.z(:,Z)=temp_variable;end 
+         for Z=1:size(EX2D.t,1);EX2D.z(Z,:)=temp_variable;end 
        
     elseif nc_isvar(filename,'pressure')==0
         if nc_isvar(filename,'depth')==1  % change depth to pressure
            temp_variable=nc_varget(filename,'depth');
-            pres = sw_pres(temp_variable,EX2D.y(:,1));
+            pres = sw_pres(temp_variable,EX2D.y(1,:));
              EX2D.z=ones(size(EX2D.t));
-         for Z=1:size(EX2D.t,2);EX2D.z(:,Z)=pres;end 
+         for Z=1:size(EX2D.t,1);EX2D.z(Z,:)=pres;end 
        
         else
 
