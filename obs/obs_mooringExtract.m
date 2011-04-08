@@ -130,7 +130,8 @@ elseif exist(filename, 'file')==2
 
         case  'all' % all
             includedata=1;
-
+             dist1=nan(size(longitude));
+                     distFrom1=nan(size(longitude));
     end % end switch case type geography
 
     if includedata==0  % if no data in area
