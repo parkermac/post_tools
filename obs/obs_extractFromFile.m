@@ -200,13 +200,13 @@ function [EX] = empty_structure_return(vars)
                 EX.z=nan;
                 EX.t=nan;
                  
-             if ischar(vars)==1;
-                EX.(vars)=nan;                                            
-            elseif iscell(vars)==1;
-                for M=1:length(vars);
-                    EX.(vars{M})=nan;
-                end
-             end
+%              if ischar(vars)==1;
+%                 EX.(vars)=nan;                                            
+%             elseif iscell(vars)==1;
+%                 for M=1:length(vars);
+%                     EX.(vars{M})=nan;
+%                 end
+%              end
    
 end       
 %%
