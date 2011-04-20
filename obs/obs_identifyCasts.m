@@ -9,7 +9,7 @@ end
 Unixyt = unique(XYT,'rows');
 cast = nan(length(XYT),1);
 C=1;
-for k=1:length(Unixyt);
+for k=1:size(Unixyt,1);
     cast(XYT==Unixyt(k))=C;
     C=C+1;
 end
