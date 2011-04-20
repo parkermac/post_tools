@@ -72,6 +72,8 @@ end
 if exist('track','var')==1  
     if  isfield(track, 'dist')
     Tdist=track.dist;
+    elseif  isfield(track, 'along_dist')
+    Tdist=track.along_dist;
     else
     TrackDistance=zeros(length(tlon),1);
         for k=1:length(tlon)-1;
