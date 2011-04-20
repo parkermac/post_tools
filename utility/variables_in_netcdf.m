@@ -1,4 +1,4 @@
-function [FilesUsed,AllVars,VarMatrix, outputfilename]=variables_in_netcdf(files, dim)
+function [FilesUsed,AllVars,VarMatrix]=variables_in_netcdf(files, dim)
 %takes the file input ( used for obs_extract) and creates a figure and
 %text file showing all variables listed in these files.  This program does
 %not differentiate between a variable existing and it being full of nans.
@@ -112,26 +112,26 @@ FilesUsed=V(:,3);
     
 
 
-outputfilename=['Vars_in_nc_files_with_dim1' num2str(dim) '.txt'];
-
-fid = fopen(outputfilename, 'wt');
-
-fprintf(fid,'Filename \t');
-fprintf(fid,'\t');
-for i=1:p; fprintf(fid,[AllVars{i} '\t']); end
-fprintf(fid,'\n');
-
-    for j=1:x-1;
-
-    a=regexp(FilesUsed{j},'\');
-        fprintf(fid,[FilesUsed{j}(a(end)+1:end-3) '\t \t']);
-         for q=1:p-1;
-        fprintf(fid,'%d\t',VarMatrix(j,q));
-         end
-      fprintf(fid,'%d\n',VarMatrix(j,end));
-    end
-
-fclose(fid)
+% outputfilename=['Vars_in_nc_files_with_dim1' num2str(dim) '.txt'];
+% 
+% fid = fopen(outputfilename, 'wt');
+% 
+% fprintf(fid,'Filename \t');
+% fprintf(fid,'\t');
+% for i=1:p; fprintf(fid,[AllVars{i} '\t']); end
+% fprintf(fid,'\n');
+% 
+%     for j=1:x-1;
+% 
+%     a=regexp(FilesUsed{j},'\');
+%         fprintf(fid,[FilesUsed{j}(a(end)+1:end-3) '\t \t']);
+%          for q=1:p-1;
+%         fprintf(fid,'%d\t',VarMatrix(j,q));
+%          end
+%       fprintf(fid,'%d\n',VarMatrix(j,end));
+%     end
+% 
+% fclose(fid)
 
 
 
