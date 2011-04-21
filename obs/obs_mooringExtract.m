@@ -1,9 +1,7 @@
-function EX2D = obs_mooringExtract(filename, vars, timerange,varargin)
+function EX2D = obs_mooringExtract(filename, vars, timerange)
 %--------------------------------------------------------------------------
-%       EX2D = obs_mooringExtract(filename, vars, timeRange
-%                                         ..., 'section',x,y,range);
-%                                         ..., 'polygon',x,y);
-%                                         ..., 'all');
+%       EX2D = obs_mooringExtract(filename, vars, timeRange)
+%                                         
 % filename must be string with only one filename
 % looks inside a netcdf file for one or more observational variables and
 % returns them in a structure _EX2D_, along with coordinate variables.
@@ -91,60 +89,12 @@ elseif exist(filename, 'file')==2
 
     longitude=nc_varget(filename,'longitude');
     latitude=nc_varget(filename,'latitude');
+   
 
-    %which type of geography?
-    switch varargin{1}
-        case 'section'  % section, trackline type
-            if length(varargin{3})>1
-                [dist, distFrom]=trackDist(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
-                if distFrom<=varargin{4};
-                    includedata=1;
-                     dist1=dist*ones(size(longitude));
-                    distFrom1=distFrom*ones(size(longitude));
-                else
-                    includedata=0;
-                end
-                %for one location  only:
-            else
-                ring=make_range_ring(varargin{2}, varargin{3}, varargin{4});%lon,;lat,,range
-                inpoly=inpolygon(longitude(1,1), latitude(1,1), ring(:,1), ring(:,2));
-                if inpoly==1
-                    includedata=1;
-                    [dist, distFrom]=trackDist(longitude(1,1),latitude(1,1), varargin{2},varargin{3});
-                    dist1=dist*ones(size(longitude));
-                     distFrom1=distFrom*ones(size(longitude));
-                else
-                    includedata=0;
-                end
-            end
-
-
-
-        case 'polygon' % polygon
-            inpoly=inpolygon(longitude(1,1), latitude(1,1), varargin{2}, varargin{3});
-            if inpoly==1
-                includedata=1;
-            else
-                includedata=0;
-            end
-
-        case  'all' % all
-            includedata=1;
-             dist1=nan(size(longitude));
-                     distFrom1=nan(size(longitude));
-    end % end switch case type geography
-
-    if includedata==0  % if no data in area
-        EX2D=empty_structure_return(vars);
-        return
-    end
-
-
-
+ 
     %get time array and check that time exist
 
     T=nc_varget(filename,'time');  % use mean time to cheeck columns in case a profile goes into the next day
-    eT=nc_varget(filename,'exact_time');
     if ischar(timerange)==1
         if strcmpi(timerange,'all')==1
             TimeInFile=1:length(T);
@@ -157,7 +107,12 @@ elseif exist(filename, 'file')==2
             return
         end
     end
-
+    
+    if nc_isvar(filename,'exact_time')==1;
+        eT=nc_varget(filename,'exact_time');
+    else
+        eT=repmat(T,1,size(longitude,2));
+    end
 
     %% now get  requested variables
  %% get general variables
@@ -166,8 +121,7 @@ elseif exist(filename, 'file')==2
     EX2D.y=latitude(TimeInFile,:);
     EX2D.t=eT(TimeInFile,:);
     EX2D.tvec=T(TimeInFile);
-     EX2D.dist=dist1(TimeInFile,:);
-      EX2D.distFrom=distFrom1(TimeInFile,:);
+
     % use var_EX2Dist to get only variables found in the file
 
     if ischar(vars)==1;  % if only one variable was given
