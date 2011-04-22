@@ -1,7 +1,7 @@
-function Sout = roms_hanning(Sin, filterWindow, outputTimebase, suffix);
+function Sout = roms_hanning(Sin, filterWindow, outputTimebase, suffix, outdir)
 
-% seriesDefOut = roms_hanning(seriesDefIn, filterWindow, outputTimebase, suffix);
-% seriesDefOut = roms_hanning(seriesDefIn, suffix);
+% seriesDefOut = roms_hanning(seriesDefIn, filterWindow, outputTimebase, suffix, outdir);
+% seriesDefOut = roms_hanning(seriesDefIn, suffix, outdir);
 %
 % filters all the variables in a file series using a hanning window and saves
 % a new series of the results.
@@ -10,6 +10,8 @@ function Sout = roms_hanning(Sin, filterWindow, outputTimebase, suffix);
 % per day, centered on noon.
 %
 % neil banas feb 2009
+
+% edited by PM 3/24/2011
 
 if nargin<4
 	suffix = filterWindow;
@@ -41,8 +43,9 @@ for i = 1:length(outputTimebase)
 	weights = interp1(linspace(t0,t1), 1+cos(linspace(-pi,pi)), Sin.nctime(f));
 	weights = weights./sum(weights);
 	nn = Sin.ncn(f);
-	outname = roms_filename([Sin.dirname Sin.basename suffix '_'], iAvg);
-	roms_averageFileSet(Sin, nn, outname, weights);
+	%outname = roms_filename([Sin.dirname Sin.basename suffix '_'], iAvg)
+	outname = roms_filename([outdir Sin.basename suffix '_'], iAvg); % PM edit
+	roms_averageFileSet(Sin, nn, outname, weights,outdir);
 	iAvg = iAvg+1;
 end
 
