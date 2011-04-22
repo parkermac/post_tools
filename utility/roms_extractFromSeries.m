@@ -1,13 +1,14 @@
-function [data,coords] = roms_extractFromSeries(series, varname, t, theType, varargin);
+function [data,coords,grid] = roms_extractFromSeries(series, varname, t, theType, varargin);
 
 % [data,coords] = roms_extractFromSeries(series, varname, t, ...
+% [data,coords,grid] = ...
 %
 % general routine for extracting data from a ROMS netcdf file series
 % (e.g., ocean_his_*.nc) in data units. _series_ is a seriesDef:
 % see roms_createSeriesDef.m. There should be no reason for the user to call
 % this directly: use roms_extract.m. See roms_extract.m for full syntax.
 %
-% neil banas feb 2009
+% neil banas, 2009-2011
 
 
 if ~isstruct(series) | ~isfield(series,'ncn') | ~isfield(series,'nctime')
@@ -16,14 +17,17 @@ elseif isempty(series.ncn) | isempty(series.nctime)
 	error('file series timebase is empty.');
 end
 
-
 if length(t) > 1 % if t is a vector, recurse over each time in the vector
 
 	outputsInitialized = false;
 	for n = 1:length(t)
 		% extract one time slice
 		disp(['    extracting ' varname ' ' num2str(n) ' / ' num2str(length(t))]);
-		[data1, coords1] = roms_extractFromSeries(series, varname, t(n), theType, varargin{:});
+		if n==1
+			[data1, coords1, grid] = roms_extractFromSeries(series, varname, t(n), theType, varargin{:});
+		else
+			[data1, coords1] = roms_extractFromSeries(series, varname, t(n), theType, varargin{:}, 'grid', grid);
+		end
 		if ~isempty(data1) 
 			if ~outputsInitialized
 				outputsInitialized = true;
@@ -59,7 +63,7 @@ else % t is scalar
 		n1 = min(ceil(n),series.ncn(end));
 		file1 = roms_filename([series.dirname series.basename],n1);
 		% do the extraction
-		[data,coords] = roms_extractFromFile(file0, varname, theType, varargin{:});
+		[data,coords,grid] = roms_extractFromFile(file0, varname, theType, varargin{:});
 		% interpolate between frames if necessary
 		if n0 ~= n1
 			[data1,coords1] = roms_extractFromFile(file1, varname, theType, varargin{:});

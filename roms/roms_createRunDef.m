@@ -1,5 +1,6 @@
 function RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename)
 
+% RD = roms_createRunDef(dirname);
 % RD = roms_createRunDef(shortname, dirname);
 % RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename);
 %
@@ -9,6 +10,12 @@ function RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename)
 %
 % neil banas feb 2009
 
+if nargin==1
+	dirname = shortname;
+	shortname = '';
+	hisbasename = 'ocean_his_';
+	diabasename = 'ocean_dia_';
+end
 if nargin==2
 	hisbasename = 'ocean_his_';
 	diabasename = 'ocean_dia_';
