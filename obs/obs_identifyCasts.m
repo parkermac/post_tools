@@ -7,10 +7,10 @@ if sum(isnan(XYT))==3
 end
 
 Unixyt = unique(XYT,'rows');
-cast = nan(length(XYT),1);
+cast = nan(size(XYT,1),1);
 C=1;
 for k=1:size(Unixyt,1);
-    cast(XYT==Unixyt(k))=C;
+    cast(XYT(:,1)==Unixyt(k,1)  & XYT(:,2)==Unixyt(k,2)&  XYT(:,3)==Unixyt(k,3))=C;
     C=C+1;
 end
     
