@@ -106,7 +106,7 @@ FilesUsed=V(:,3);
      F{l,1}=a{l}{end};
  end
      set(gca,'ytick',1:x-1 ,'yticklabel',F(:,1) ,'FontSize',8)
-     ylim([1 x-1])
+if x > 2, ylim([1 x-1]); end
     xlim([1 p])    
     
     
