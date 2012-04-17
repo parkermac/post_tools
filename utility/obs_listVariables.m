@@ -1,8 +1,11 @@
-function [FilesUsed,AllVars,VarMatrix]=obsVariables_in_netcdf(files, dim)
-%takes the file input ( used for obs_extract) and creates a figure and
+function [FilesUsed,AllVars,VarMatrix]=obs_listVariables(files, dim)
+
+% [FilesUsed,AllVars,VarMatrix]=obs_listVariables(files, dim)
+%
+%takes the file input (used for obs_extract) and creates a figure and
 %text file showing all variables listed in these files.  This program does
 %not differentiate between a variable existing and it being full of nans.
-
+%
 %dim is the dimension of variables in the netcdf files
 %mooring files have dim=2, all other files have dim=1.  If dim is not assigned then
 %variables from both types of files are returned.

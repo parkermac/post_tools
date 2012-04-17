@@ -10,11 +10,15 @@ for i=1:length(casts)
 	fields = fieldnames(c);
 	[zu,ui] = unique(c.z);
 	for fi = 1:length(fields)
-		if length(zu) < 2 & any(~isnan(c.(fields{fi})(ui)))
-			ci.(fields{fi})(i) = nan;
+		if length(zu) < 2 & length(unique(c.(fields{fi}))) == 1
+			ci.(fields{fi})(i) = c.(fields{fi})(1);
 		else
-			f = find(~isnan(c.(fields{fi})(ui)));
-			ci.(fields{fi})(i) = interp1(zu(f),c.(fields{fi})(ui(f)),zi);
+			try
+				f = find(~isnan(c.(fields{fi})(ui)));
+				ci.(fields{fi})(i) = interp1(zu(f),c.(fields{fi})(ui(f)),zi);
+			catch
+				ci.(fields{fi})(i) = nan;
+			end
 		end
 	end
 end
