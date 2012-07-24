@@ -1,4 +1,4 @@
-function Sout = roms_godinfilt(Sin, outputTimebase, suffix,outdir,istart)
+function Sout = roms_godinfilt_native(Sin, outputTimebase, suffix,outdir,istart)
 
 % seriesDefOut = roms_godinfilt(seriesDefIn, outputTimebase, suffix);
 % seriesDefOut = roms_godinfilt(seriesDefIn, suffix);
@@ -17,7 +17,11 @@ function Sout = roms_godinfilt(Sin, outputTimebase, suffix,outdir,istart)
 % Sin.nctime
 % SNG 4/17/2012 checked the output from this code with a low pass godin
 % filter on ssh at an individual mooring and they check out perfectly
-%-------------------------------------------------------------------------
+% SNG 4/18/2012 The only difference between this and roms_godinfilt.m is
+% the call to roms_averageFileSet_native.m rather than roms_averageFileSet.
+% Note that as I wrote in roms_averageFileSet_native.m the speed up is
+% rather small (~5% by one test, close to 0 in another test)
+%------------------------------------------------------------------------
 
 if nargin<3
 	suffix = outputTimebase;
@@ -76,7 +80,7 @@ for i = iAvg:length(outputTimebase)
     end
     nn = Sin.ncn(f);
     outname = roms_filename([outdir Sin.basename suffix '_'], iAvg); % SNG to match PM roms_hanning.m edit
-    roms_averageFileSet(Sin, nn, outname, weights, outdir);
+    roms_averageFileSet_native(Sin, nn, outname, weights, outdir);
     iAvg = iAvg+1;
 end
 

@@ -9,6 +9,7 @@ function RD = roms_createRunDef(shortname, dirname, hisbasename, diabasename)
 % and model grid
 %
 % neil banas feb 2009
+% sng included option for nargin==3 april 2011
 
 if nargin==1
 	dirname = shortname;
@@ -19,6 +20,9 @@ end
 if nargin==2
 	hisbasename = 'ocean_his_';
 	diabasename = 'ocean_dia_';
+end
+if nargin==3
+    diabasename = 'ocean_dia_';
 end
 
 RD.shortname = shortname;

@@ -1,4 +1,4 @@
-function Sout = roms_hanning(Sin, filterWindow, outputTimebase, suffix, outdir)
+function Sout = roms_hanning(Sin, filterWindow, outputTimebase, suffix, outdir,istart)
 
 % seriesDefOut = roms_hanning(seriesDefIn, filterWindow, outputTimebase, suffix, outdir);
 % seriesDefOut = roms_hanning(seriesDefIn, suffix, outdir);
@@ -12,11 +12,13 @@ function Sout = roms_hanning(Sin, filterWindow, outputTimebase, suffix, outdir)
 % neil banas feb 2009
 
 % edited by PM 3/24/2011
+% edited by SNG 6/20/2011 to include istart as an option in order to start the code on an output file other than 1
 
-if nargin<4
+if nargin<5
 	suffix = filterWindow;
 	filterWindow = [];
 	outputTimebase = [];	
+	istart = 1;
 end
 if isempty(filterWindow)
 	filterWindow = 40/24;
@@ -34,8 +36,8 @@ else
 	outputTimebase = outputTimebase(outputTimebase >= t0 & outputTimebase <= t1);
 end
 
-iAvg = 1;
-for i = 1:length(outputTimebase)
+iAvg = istart; %SNG changed this line and the following to start at iAvg = start so you can run this code starting at an output file other than 1
+for i = iAvg:length(outputTimebase)
 	ti = outputTimebase(i);
 	t0 = ti - filterWindow/2;
 	t1 = ti + filterWindow/2;
@@ -43,7 +45,6 @@ for i = 1:length(outputTimebase)
 	weights = interp1(linspace(t0,t1), 1+cos(linspace(-pi,pi)), Sin.nctime(f));
 	weights = weights./sum(weights);
 	nn = Sin.ncn(f);
-	%outname = roms_filename([Sin.dirname Sin.basename suffix '_'], iAvg)
 	outname = roms_filename([outdir Sin.basename suffix '_'], iAvg); % PM edit
 	roms_averageFileSet(Sin, nn, outname, weights,outdir);
 	iAvg = iAvg+1;

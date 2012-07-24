@@ -1,4 +1,4 @@
-function [t, dt] = TestContinuousTimeStamp(dirname, ncbasename)
+function [t, dt] = roms_testContinuousTimeStamp(dirname, ncbasename)
 
 %this function tests that the files within dirname (which should be the
 %ROMS history output directory, or could be a lp directory) have a
@@ -10,6 +10,8 @@ function [t, dt] = TestContinuousTimeStamp(dirname, ncbasename)
 %be ocean_his_lp_ or some other name of choice
 %
 %SNG April 2011
+
+addpath(genpath('/home/sarahgid/mexcdf/'))
 
 if nargin < 2
     ncbasename = 'ocean_his_';
@@ -40,5 +42,5 @@ plot(dt);
 if isempty(find(dt~=dt(1), 1))
     disp([dirname ' contains history files with a uniform time interval of ' num2str(dt(1)./(60*60)) ' hours'])
 else
-    error(['WARNING! ' dirname ' does NOT contain a uniform time interval!'])
+    disp(['WARNING! ' dirname ' does NOT contain a uniform time interval!'])
 end
