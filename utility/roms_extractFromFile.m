@@ -6,6 +6,7 @@ function [data,coords,G] = roms_extractFromFile(filename, varname, theType, vara
 %                                          ..., 'point', y, x);
 %     roms_extractFromFile(filename, 4Dvarname, 'full');
 %                                          ..., 'surface');
+%                                          ..., 'bottom');
 %                                          ..., 'zslice', z);
 %                                          ..., 'depthslice', depth);
 %                                          ..., 'depthaverage', [mindepth maxdepth]);
@@ -179,6 +180,13 @@ else
 		case 'surface' % ----- 4D, surface field
 			data = nc_varget(filename, varname, [0 K-1 0 0], [1 1 -1 -1]);
 			zm = zeta2;
+			ym = y2;
+			xm = x2;
+			data(mask2==0) = nan;
+			
+		case 'bottom' % ----- 4D, bottom field
+			data = nc_varget(filename, varname, [0 0 0 0], [1 1 -1 -1]);
+			zm = H2;
 			ym = y2;
 			xm = x2;
 			data(mask2==0) = nan;
