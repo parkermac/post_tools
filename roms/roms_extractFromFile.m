@@ -147,17 +147,10 @@ else
 	else
 		error(['the 2nd dimension of ' varname ' should be s_rho, s_w, or length 1.']);
 	end
-	% make (x3,y3,z3,cs3,mask3) matching the variable in all dimensions
-	% [commented out because it's fairly slow; now these are calculated as needed
+	% originally, made x3,y3,mask3,zeta3,H3,cs3,z3 here, matching the variable in all
+	% dimensions, but this is fairly slow, so now they're calculated as needed
 	% under the various extraction types below. If one of those extractions
-	% fails, the bug is likely to be the lack of one of these variables. -nb, apr 2011] 
-	%x3 = repmat(reshape(x2, [1 J I]), [K 1 1]);
-	%y3 = repmat(reshape(y2, [1 J I]), [K 1 1]);
-	%mask3 = repmat(reshape(mask2, [1 J I]), [K 1 1]);
-	%zeta3 = repmat(reshape(zeta2,[1 J I]),[K 1 1]);
-	%H3 = repmat(reshape(H2,[1 J I]),[K 1 1]);
-	%cs3 = repmat(cs(:),[1 J I]);
-	%z3 = zeta3 + cs3.*(zeta3+H3);
+	% fails, the bug is likely to be the lack of one of these variables.
 	
 	% below, we'll make zm,ym,xm,... to match the _extraction_ in size
 	xm = [];

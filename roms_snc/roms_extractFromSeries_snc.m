@@ -1,12 +1,12 @@
-function [data,coords,grid] = roms_extractFromSeries(series, varname, t, theType, varargin);
+function [data,coords,grid] = roms_extractFromSeries_snc(series, varname, t, theType, varargin);
 
-% [data,coords] = roms_extractFromSeries(series, varname, t, ...
+% [data,coords] = roms_extractFromSeries_snc(series, varname, t, ...
 % [data,coords,grid] = ...
 %
 % general routine for extracting data from a ROMS netcdf file series
-% (e.g., ocean_his_*.nc) in data units. _series_ is a seriesDef:
-% see roms_createSeriesDef.m. There should be no reason for the user to call
-% this directly: use roms_extract.m. See roms_extract.m for full syntax.
+% (e.g., ocean_his_*.nc) in data units. _series_ is a structure created by 
+% roms_createSeriesDef.m. There should be no reason for the user to call
+% this directly: use roms_extract.m. See roms_extract_snc.m for full syntax.
 %
 % neil banas, 2009-2011
 
@@ -24,9 +24,9 @@ if length(t) > 1 % if t is a vector, recurse over each time in the vector
 		% extract one time slice
 		disp(['    extracting ' varname ' ' num2str(n) ' / ' num2str(length(t))]);
 		if n==1
-			[data1, coords1, grid] = roms_extractFromSeries(series, varname, t(n), theType, varargin{:});
+			[data1, coords1, grid] = roms_extractFromSeries_snc(series, varname, t(n), theType, varargin{:});
 		else
-			[data1, coords1] = roms_extractFromSeries(series, varname, t(n), theType, varargin{:}, 'grid', grid);
+			[data1, coords1] = roms_extractFromSeries_snc(series, varname, t(n), theType, varargin{:}, 'grid', grid);
 		end
 		if ~isempty(data1) 
 			if ~outputsInitialized
@@ -63,10 +63,10 @@ else % t is scalar
 		n1 = min(ceil(n),series.ncn(end));
 		file1 = roms_filename([series.dirname series.basename],n1);
 		% do the extraction
-		[data,coords,grid] = roms_extractFromFile(file0, varname, theType, varargin{:});
+		[data,coords,grid] = roms_extractFromFile_snc(file0, varname, theType, varargin{:});
 		% interpolate between frames if necessary
 		if n0 ~= n1
-			[data1,coords1] = roms_extractFromFile(file1, varname, theType, varargin{:});
+			[data1,coords1] = roms_extractFromFile_snc(file1, varname, theType, varargin{:});
 			fr = (n-n0)/(n1-n0);
 			data = data + (data1-data).*fr;
 			if isfield(coords,'zm')
