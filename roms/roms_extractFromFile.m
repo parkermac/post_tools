@@ -52,7 +52,11 @@ if sz(1) ~= 1, error(['the first dimension of ' varname ' isn''t length 1.']); e
 if ndims==3
 	% 3D variables ---------------------------------------------------------------------------------
 	% grid and coordinates -------------------------------
-	G = roms_loadGrid(filename);
+	if length(varargin) > 2 & strcmp(varargin{end-1},'grid')
+		G = varargin{end};
+	else
+		G = roms_loadGrid(filename);
+	end
 	if strcmp(dims{2},'eta_rho') & strcmp(dims{3},'xi_rho')
 		y2 = G.lat;
 		x2 = G.lon;

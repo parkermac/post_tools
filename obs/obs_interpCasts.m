@@ -1,4 +1,4 @@
-function ci = obs_separateCasts(casts,zi);
+function ci = obs_interpCasts(casts,zi);
 %{
 works on the output from obs_separateCasts, interpolating all variables to the
 depth zi. zi can be a vector.

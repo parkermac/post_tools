@@ -1,21 +1,16 @@
-roms_extract
-	support for multiple saves per roms file
-
-roms_extract
-	cell array of all inputs after filename--list of extractions to do per file
-
-roms_extract
-	be clever about not loading full variable more than once
-
+make roms_extractFromFile use roms_extractFromVariable
 
 rethink roms_createRunDef
-
-remove obs_mooring code
 
 switch to native netcdf
 	move roms_averageFileSet_native and roms_godinfilt_native
 	should roms_extract preserve the dimension order that snctools delivers, or reverse everything?
+	update: Parker, Sarah, and Neil determined that the snctools dimension order is preferable, and this means that switching to native netcdf may not provide any speedup, since every large extraction would require an annoying rearranging step afterwards.
 	
+roms_extract
+	support for multiple saves per roms file;
+	cell array of all inputs after filename--list of extractions to do per file (?)
+
 in obs_extract,
 the files in the master data archive should all be given a string variable
 or attribute called "contact" that gives an agency/program and a person
