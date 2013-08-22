@@ -1,4 +1,4 @@
-function Sout = roms_godinfilt_native(Sin, outputTimebase, suffix,outdir,istart)
+function Sout = roms_godinfilt(Sin, outputTimebase, suffix,outdir,istart)
 
 % seriesDefOut = roms_godinfilt(seriesDefIn, outputTimebase, suffix, outdir, istart);
 % seriesDefOut = roms_godinfilt(seriesDefIn, suffix);
