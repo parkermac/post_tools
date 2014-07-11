@@ -1,7 +1,7 @@
 function Sout = roms_godinfilt(Sin, outputTimebase, suffix,outdir,istart)
 
 % seriesDefOut = roms_godinfilt(seriesDefIn, outputTimebase, suffix, outdir, istart);
-% seriesDefOut = roms_godinfilt(seriesDefIn, suffix);
+% seriesDefOut = roms_godinfilt(seriesDefIn, [], suffix, outdir);
 %
 % filters all the variables in a file series using a 24-24-25 hr window and saves
 % a new series of the results (Godin filter).
